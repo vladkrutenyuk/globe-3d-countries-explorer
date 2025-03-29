@@ -1,0 +1,79 @@
+[
+    {
+        "name": {
+            "common": "Russia",
+            "official": "Russian Federation",
+            "nativeName": {
+                "rus": {
+                    "official": "Российская Федерация",
+                    "common": "Россия"
+                }
+            }
+        },
+        "tld": [
+            ".ru",
+            ".su",
+            ".рф"
+        ],
+        "currencies": {
+            "RUB": {
+                "name": "Russian ruble",
+                "symbol": "₽"
+            }
+        },
+        "capital": [
+            "Moscow"
+        ],
+        "altSpellings": [
+            "RU",
+            "Russian Federation",
+            "Российская Федерация"
+        ],
+        "region": "Europe",
+        "subregion": "Eastern Europe",
+        "languages": {
+            "rus": "Russian"
+        },
+        "latlng": [
+            60,
+            100
+        ],
+        "area": 17098242,
+        "flag": "🇷🇺",
+        "maps": {
+            "googleMaps": "https://goo.gl/maps/4F4PpDhGJgVvLby57",
+            "openStreetMaps": "https://www.openstreetmap.org/relation/60189#map=3/65.15/105.29"
+        },
+        "population": 144104080,
+        "timezones": [
+            "UTC+03:00",
+            "UTC+04:00",
+            "UTC+06:00",
+            "UTC+07:00",
+            "UTC+08:00",
+            "UTC+09:00",
+            "UTC+10:00",
+            "UTC+11:00",
+            "UTC+12:00"
+        ],
+        "continents": [
+            "Europe",
+            "Asia"
+        ],
+        "flags": {
+            "png": "https://flagcdn.com/w320/ru.png",
+            "svg": "https://flagcdn.com/ru.svg",
+            "alt": "The flag of Russia is composed of three equal horizontal bands of white, blue and red."
+        },
+        "coatOfArms": {
+            "png": "https://mainfacts.com/media/images/coats_of_arms/ru.png",
+            "svg": "https://mainfacts.com/media/images/coats_of_arms/ru.svg"
+        },
+        "capitalInfo": {
+            "latlng": [
+                55.75,
+                37.6
+            ]
+        }
+    }
+]
