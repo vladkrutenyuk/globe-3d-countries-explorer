@@ -9,7 +9,7 @@ npm run dev
 ```
 
 ## Live demo
-Visit https://globe.vladkrutenyuk.ru
+Visit https://globe.vladkrutenyuk.ru/
 
 
 ## About
