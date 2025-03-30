@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { glsl } from "./_glsl";
 
 export function fresnel<T extends THREE.Material>(
 	material: T,
@@ -12,8 +13,8 @@ export function fresnel<T extends THREE.Material>(
 		Object.assign(program.uniforms, uniforms);
 
 		program.fragmentShader = program.fragmentShader.replace(
-			/*glsl*/ `#include <common>`,
-			/*glsl*/ `
+			glsl`#include <common>`,
+			glsl`
             #include <common>
 			uniform float fresnelPower;
 			uniform float fresnelIntensity;
@@ -22,8 +23,8 @@ export function fresnel<T extends THREE.Material>(
 		);
 
 		program.fragmentShader = program.fragmentShader.replace(
-			/*glsl*/ `#include <opaque_fragment>`,
-			/*glsl*/ `        
+			glsl`#include <opaque_fragment>`,
+			glsl`        
             #include <opaque_fragment>
     
             vec3 viewDir = normalize(vViewPosition);

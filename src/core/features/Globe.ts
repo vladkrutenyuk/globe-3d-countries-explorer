@@ -1,4 +1,9 @@
-import { addFeature, CoreContext, IFeaturable, Object3DFeature } from "@vladkrutenyuk/three-kvy-core";
+import {
+	addFeature,
+	CoreContext,
+	IFeaturable,
+	Object3DFeature,
+} from "@vladkrutenyuk/three-kvy-core";
 import * as THREE from "three";
 import { AppCoreCtxModule } from "../AppCore";
 import { GlobeMap } from "./GlobeMap";
@@ -25,59 +30,62 @@ export class Globe extends Object3DFeature<AppCoreCtxModule, GlobeEventTypes> {
 		const map = this.map;
 		map.initByGeojson(geoJson.data, geoJson.countryIdPropKey);
 
-		const globeMaterial = new THREE.MeshStandardMaterial({
-			map: map.texture,
-			emissive: new THREE.Color(0xffffff),
-			emissiveMap: map.highlightTexture,
-		});
-		fresnel(globeMaterial, {
-			fresnelPower: new THREE.Uniform(8.0),
-			fresnelIntensity: new THREE.Uniform(0.2),
-			fresnelColor: new THREE.Uniform(new THREE.Color(1.0, 1.0, 1.0)),
-		});
+		const globeMaterial = fresnel(
+			new THREE.MeshStandardMaterial({
+				map: map.texture,
+				emissive: new THREE.Color(0xffffff),
+				emissiveMap: map.highlightTexture,
+			}),
+			{
+				fresnelPower: new THREE.Uniform(8.0),
+				fresnelIntensity: new THREE.Uniform(0.2),
+				fresnelColor: new THREE.Uniform(new THREE.Color(1.0, 1.0, 1.0)),
+			}
+		);
 
 		const sphere = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 32), globeMaterial);
 		this.object.add(sphere);
 
-		const backGlowSpriteMat = new THREE.SpriteMaterial({
-			color: 0xffffff,
-			transparent: true,
-		});
-		radialFade(backGlowSpriteMat);
+		const backGlowSpriteMat = radialFade(
+			new THREE.SpriteMaterial({
+				color: 0xffffff,
+				transparent: true,
+			})
+		);
 
 		const backGlowSprite = new THREE.Sprite(backGlowSpriteMat);
 		backGlowSprite.scale.setScalar(2.5);
 		sphere.add(backGlowSprite);
 
-        const clickEffect = addFeature(this.object, GlobeClickEffect);
+		const clickEffect = addFeature(this.object, GlobeClickEffect);
 
 		const pointer = ctx.modules.pointer;
 		pointer.registerObj(sphere);
 
-        const onClick = (intersection?: THREE.Intersection) => {
+		const onClick = (intersection?: THREE.Intersection) => {
 			if (!intersection) {
 				this.selectCountry(null);
 				return;
 			}
 			const { object, uv } = intersection;
 			if (object !== sphere || !uv) return;
-            
-            clickEffect.click(intersection);
+
+			clickEffect.click(intersection);
 
 			const id = map.getCountryIdAtUvClick(uv);
 			id && this.selectCountry(id);
-        }
+		};
 
 		pointer.on("click", onClick);
 
 		return () => {
-            pointer.off("click", onClick);
+			pointer.off("click", onClick);
 			pointer.unregisterObj(sphere);
 			this.object.remove(sphere);
 			this.object.remove(sphere);
 			sphere.geometry.dispose();
 			sphere.material.dispose();
-            backGlowSpriteMat.dispose();
+			backGlowSpriteMat.dispose();
 			map.dispose();
 		};
 	}
