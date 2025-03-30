@@ -1,8 +1,8 @@
-import { FC, PropsWithChildren, useEffect, useState } from "react";
+import { FC, PropsWithChildren, ReactNode, useEffect, useState } from "react";
 import { AppCore } from "../../core/AppCore";
 import { AppCoreContext } from "./AppCoreContext";
 
-export const AppCoreProvider: FC<PropsWithChildren> = ({ children }) => {
+export const AppCoreProvider: FC<PropsWithChildren & {loading: ReactNode}> = ({ children, loading }) => {
 	const [appCore, setAppCore] = useState<AppCore | null>(null);
 	const [error, setError] = useState<AppCore | null>(null);
 
@@ -18,8 +18,8 @@ export const AppCoreProvider: FC<PropsWithChildren> = ({ children }) => {
 		};
 	}, [appCore]);
 
-	if (!appCore) return <div className="text-4xl font-bold">loading...</div>;
 	if (error) return <div className="text-4xl font-bold">ERROR</div>;
+	if (!appCore) return loading;
 
 	return <AppCoreContext.Provider value={appCore}>{children}</AppCoreContext.Provider>;
 };

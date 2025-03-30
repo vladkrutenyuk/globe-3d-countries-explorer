@@ -8,6 +8,8 @@ import { AppCoreCtxModule } from "../AppCore";
 import * as THREE from "three";
 import * as TWEEN from "three/examples/jsm/libs/tween.module.js";
 import { ring } from "../shaders/ring";
+import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { SCENE_COLORS } from "../config";
 
 export class GlobeClickEffect extends Object3DFeature<AppCoreCtxModule> {
 	private readonly _root: THREE.Group;
@@ -15,7 +17,7 @@ export class GlobeClickEffect extends Object3DFeature<AppCoreCtxModule> {
 
 	private _tweenGroup = new TWEEN.Group();
 	private _tween = new TWEEN.Tween({ scale: 0, opacity: 3, t: 0 }, this._tweenGroup);
-	private _tweenTo = { scale: 0.15, opacity: 0, t: 1 };
+	private _tweenTo = { scale: 1, opacity: 0, t: 1 };
 
 	constructor(object: IFeaturable) {
 		super(object);
@@ -42,18 +44,33 @@ export class GlobeClickEffect extends Object3DFeature<AppCoreCtxModule> {
 		root.add(ringPlane);
 		this._ringPlane = ringPlane;
 
+		const oc = ctx.modules.cameraController.orbitControls;
+		const onOrbitControlsChange = (event: THREE.Event<"change", OrbitControls>) => {
+			this.cameraDistanceChanged(event.target.getDistance());
+		};
+		oc.addEventListener("change", onOrbitControlsChange);
+		this.cameraDistanceChanged(oc.getDistance());
+
+		const unwatchTheme = ctx.modules.themeMode.watch((isDark: boolean) => {
+            const col = isDark ? SCENE_COLORS.dark.ring : SCENE_COLORS.light.ring
+			ringPlane.material.color.set(col);
+		});
+
 		return () => {
-            this.object.remove(root);
+			this.object.remove(root);
 
 			ringPlane.removeFromParent();
 			ringPlane.material.dispose();
-            this._ringPlane = undefined;
+			this._ringPlane = undefined;
 
-            this._tween.stop();
+			this._tween.stop();
+
+			oc.removeEventListener("change", onOrbitControlsChange);
+            unwatchTheme();
 		};
 	}
 
-	onBeforeRender(ctx: CoreContext<AppCoreCtxModule>): void {
+	onBeforeRender() {
 		this._tweenGroup.update();
 	}
 
@@ -71,8 +88,10 @@ export class GlobeClickEffect extends Object3DFeature<AppCoreCtxModule> {
 		root.quaternion.copy(_qt);
 
 		const plane = this._ringPlane;
+		root.visible = true;
 		if (!plane) return;
 
+		// return;
 		this._tween
 			.to(this._tweenTo)
 			.duration(600)
@@ -88,6 +107,10 @@ export class GlobeClickEffect extends Object3DFeature<AppCoreCtxModule> {
 				root.visible = false;
 			})
 			.start();
+	}
+
+	private cameraDistanceChanged(distance: number) {
+		this._root.scale.setScalar(distance * 0.04);
 	}
 }
 

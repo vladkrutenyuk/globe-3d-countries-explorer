@@ -8,7 +8,7 @@ export function useFetch<T>(url: RequestInfo | URL, init?: RequestInit) {
 	const requestInitRef = useRef(init);
 	const [data, setData] = useState<T | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	const [error, setError] = useState<FetchError | null>(null);
 
 	useEffect(() => {
 		if (!url) return;
@@ -18,11 +18,13 @@ export function useFetch<T>(url: RequestInfo | URL, init?: RequestInit) {
 
 		setLoading(true);
 		setError(null);
+		setData(null);
 
 		fetcher(url, { signal, ...init })
 			.then(setData)
 			.catch((err) => {
-				if (err.name !== "AbortError") setError(err.message);
+				console.error(err)
+				if (err.name !== "AbortError") setError(err);
 			})
 			.finally(() => setLoading(false));
 
@@ -32,10 +34,11 @@ export function useFetch<T>(url: RequestInfo | URL, init?: RequestInit) {
 	return { data, loading, error };
 }
 
-async function fetcher(url: RequestInfo | URL, init?: RequestInit) {
+export async function fetcher(url: RequestInfo | URL, init?: RequestInit) {
 	const res = await fetch(url, init);
 	const json = await res.json();
 	if (!res.ok) {
+		console.log("status", res.statusText)
 		throw new FetchError(res, json);
 	}
 	return json;
@@ -44,10 +47,11 @@ async function fetcher(url: RequestInfo | URL, init?: RequestInit) {
 export class FetchError extends Error {
 	status: number;
 	data: unknown;
+	name = "FetchError";
+
 	constructor(res: Response, data: unknown) {
-		super(res.statusText);
+		super(res.statusText || `Error ${res.status}: Fetch Failed`);
 		this.status = res.status;
 		this.data = data;
-		this.name = "CustomFetchError";
 	}
 }

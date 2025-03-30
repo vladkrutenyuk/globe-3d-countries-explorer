@@ -1,77 +1,38 @@
 import { FC, HTMLAttributes, PropsWithChildren } from "react";
-import { useCountryDataFetch } from "../rest-countries-data/useCountryDataFetch";
+import {
+	RestCountryDataFields,
+	useCountryDataFetch,
+} from "../../features/rest-countries-data/useCountryDataFetch";
 import { Button } from "@/shared/shadcn/components/ui/button";
 import { Skeleton } from "@/shared/shadcn/components/ui/skeleton";
+import { ErrorBubble } from "@/shared/ui/ErrorBubble";
+
+const fields: RestCountryDataFields[] = [
+	"name",
+	"population",
+	"area",
+	"capital",
+	"capitalInfo",
+	"region",
+	"maps",
+	"subregion",
+	"flag",
+	"flags",
+	"tld",
+	"currencies",
+];
 
 export const CountryDetailedInfoContent: FC<
 	HTMLAttributes<HTMLDivElement> & { countryId: string }
 > = ({ countryId, ...props }) => {
-	const { data, loading, error } = useCountryDataFetch(countryId, [
-		"name",
-		"population",
-		"area",
-		"capital",
-		"capitalInfo",
-		"region",
-		"maps",
-		"subregion",
-		"flag",
-		"flags",
-		"tld",
-		"currencies",
-	]);
+	const { data, loading, error } = useCountryDataFetch(countryId, fields);
 
-	if (error)
-		return (
-			<div className="text-destructive">
-				<div className="border border-destructive rounded-md mt-4 bg-destructive/15 font-bold px-2 py-1.5">
-					<span>{error}</span>
-				</div>
-			</div>
-		);
+	if (error) return <ErrorBubble error={error.message} className="mt-4" />;
 
 	if (!data || loading)
 		return (
 			<div {...props}>
-				<Label>Flag</Label>
-				<Content>
-					<Skeleton className="h-[66px] w-[100px]" />
-				</Content>
-
-				<Label>Capital</Label>
-				<Content>
-					<Skeleton className="h-5 w-[200px]" />
-				</Content>
-
-				<Label>Aria</Label>
-				<Content>
-					<Skeleton className="h-5 w-[200px]" />
-				</Content>
-
-				<Label>Population</Label>
-				<Content>
-					<Skeleton className="h-5 w-[200px]" />
-				</Content>
-
-				<Label>Region</Label>
-				<Content>
-					<Skeleton className="h-5 w-[200px]" />
-				</Content>
-
-				<Label>Subregion</Label>
-				<Content>
-					<Skeleton className="h-5 w-[200px]" />
-				</Content>
-
-				<Label>Domain zones</Label>
-				<Content>
-					<Skeleton className="h-5 w-[200px]" />
-				</Content>
-
-				<Label>Currencies</Label>
-				<Content>
-					<Skeleton className="h-5 w-[200px]" />
-				</Content>
+				<SkeletonContent />
 			</div>
 		);
 
@@ -123,13 +84,59 @@ export const CountryDetailedInfoContent: FC<
 			<hr className="mt-6 mb-6 w-full" />
 			<Content>
 				<div className="w-full flex space-x-2 mt-2 [&>*]:flex-shrink-0 [&>*]:flex-grow">
-                    <LinkBtn href={data.maps.googleMaps}>Google Maps</LinkBtn>
-                    <LinkBtn href={data.maps.openStreetMaps}>OpenStreetMap</LinkBtn>
+					<LinkBtn href={data.maps.googleMaps}>Google Maps</LinkBtn>
+					<LinkBtn href={data.maps.openStreetMaps}>OpenStreetMap</LinkBtn>
 				</div>
 			</Content>
 		</div>
 	);
 };
+
+function SkeletonContent() {
+	return (
+		<>
+			<Label>Flag</Label>
+			<Content>
+				<Skeleton className="h-[66px] w-[100px]" />
+			</Content>
+
+			<Label>Capital</Label>
+			<Content>
+				<Skeleton className="h-5 w-[200px]" />
+			</Content>
+
+			<Label>Aria</Label>
+			<Content>
+				<Skeleton className="h-5 w-[200px]" />
+			</Content>
+
+			<Label>Population</Label>
+			<Content>
+				<Skeleton className="h-5 w-[200px]" />
+			</Content>
+
+			<Label>Region</Label>
+			<Content>
+				<Skeleton className="h-5 w-[200px]" />
+			</Content>
+
+			<Label>Subregion</Label>
+			<Content>
+				<Skeleton className="h-5 w-[200px]" />
+			</Content>
+
+			<Label>Domain zones</Label>
+			<Content>
+				<Skeleton className="h-5 w-[200px]" />
+			</Content>
+
+			<Label>Currencies</Label>
+			<Content>
+				<Skeleton className="h-5 w-[200px]" />
+			</Content>
+		</>
+	);
+}
 
 function Label(props: PropsWithChildren) {
 	return <h3 className="font-semibold mt-4 mb-1">{props.children}</h3>;

@@ -1,13 +1,15 @@
 import * as THREE from "three";
 import { glsl } from "./_glsl";
 
+export type FresnelUniforms = {
+	fresnelPower: THREE.Uniform<number>;
+	fresnelIntensity: THREE.Uniform<number>;
+	fresnelColor: THREE.Uniform<THREE.Color>;
+}
+
 export function fresnel<T extends THREE.Material>(
 	material: T,
-	uniforms: {
-		fresnelPower: THREE.Uniform<number>;
-		fresnelIntensity: THREE.Uniform<number>;
-		fresnelColor: THREE.Uniform<THREE.Color>;
-	}
+	uniforms: FresnelUniforms
 ): T {
 	material.onBeforeCompile = (program) => {
 		Object.assign(program.uniforms, uniforms);

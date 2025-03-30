@@ -1,8 +1,11 @@
+import { CoreContext, IFeaturable, Object3DFeature } from "@vladkrutenyuk/three-kvy-core";
 import * as THREE from "three";
+import { AppCoreCtxModule } from "../AppCore";
+import { SCENE_COLORS } from "../config";
 
-type ColorRgbExpression = `rgb(${number},${number},${number})`
+type ColorRgbExpression = `rgb(${number},${number},${number})`;
 
-export class GlobeMap {
+export class GlobeMap extends Object3DFeature<AppCoreCtxModule> {
 	canvas: HTMLCanvasElement;
 	canvasCtx: CanvasRenderingContext2D;
 	texture: THREE.CanvasTexture;
@@ -19,7 +22,8 @@ export class GlobeMap {
 
 	private readonly _countryByIdColors: Partial<Record<ColorRgbExpression, string>> = {};
 
-	constructor() {
+	constructor(object: IFeaturable) {
+		super(object);
 		const canvas = document.createElement("canvas");
 		canvas.width = this.width;
 		canvas.height = this.height;
@@ -44,16 +48,28 @@ export class GlobeMap {
 		this.highlightTexture = new THREE.CanvasTexture(highlightCanvas);
 	}
 
-	initByGeojson(geojson: GeoJsonFeatureCollection, countryIdPropKey: string) {
-		this.drawMap(geojson);
-		this.drawMapId(geojson, countryIdPropKey);
+	protected useCtx(
+		ctx: CoreContext<AppCoreCtxModule>
+	): undefined | (() => void) | void {
+		const { geoJson, themeMode } = ctx.modules;
+
+		this.drawMapId(geoJson.data, geoJson.countryIdPropKey);
+		const unwatch = themeMode.watch((isDark) => {
+			const land = isDark ? SCENE_COLORS.dark.map.land : SCENE_COLORS.light.map.land;
+			const water = isDark ? SCENE_COLORS.dark.map.water : SCENE_COLORS.light.map.water;
+			this.drawMap(geoJson.data, land, water);
+		})
+		return () => {
+			unwatch();
+			this.dispose();
+		};
 	}
 
 	dispose() {
 		this.texture.dispose();
 		this.idTexture.dispose();
 		this.highlightTexture.dispose();
-	
+
 		const instance = this as Partial<typeof this>;
 		instance.canvas = undefined;
 		instance.canvasCtx = undefined;
@@ -69,12 +85,11 @@ export class GlobeMap {
 		// important to invert uv.y bcs canvas has another vertical order (up-down)
 		const y = Math.floor((1 - uv.y) * idCanvas.height);
 
-
 		const pixel = this.idCanvasCtx.getImageData(x, y, 2, 2).data;
 		const [r, g, b] = pixel;
 		const key = `rgb(${r},${g},${b})` as const;
 
-		return this._countryByIdColors[key]
+		return this._countryByIdColors[key];
 	}
 
 	highlightCountry(feature: GeoJsonFeature, color: string) {
@@ -85,11 +100,14 @@ export class GlobeMap {
 		this.highlightTexture.needsUpdate = true;
 	}
 
-	private drawMap(geojson: GeoJsonFeatureCollection) {
+	private drawMap(geojson: GeoJsonFeatureCollection, landCol: string, waterCol: string) {
 		const ctx = this.canvasCtx;
 		ctx.clearRect(0, 0, this.width, this.height);
 
-		ctx.fillStyle = "#323235"; // Цвет стран
+		ctx.fillStyle = waterCol;
+		ctx.fillRect(0, 0, this.width, this.height);
+
+		ctx.fillStyle = landCol;
 		geojson.features.forEach((feature: GeoJsonFeature) => {
 			this.drawGeoFeature(ctx, feature);
 		});
@@ -120,7 +138,6 @@ export class GlobeMap {
 		console.log(this._countryByIdColors);
 		this.idTexture.needsUpdate = true;
 	}
-
 
 	private getIdColorByIndex(i: number): ColorRgbExpression {
 		const r = (i + 1) % 255;

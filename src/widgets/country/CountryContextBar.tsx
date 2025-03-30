@@ -7,38 +7,61 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/shared/shadcn/components/ui/sheet";
-import { Loader2, SquareMenu } from "lucide-react";
-import { FC, PropsWithChildren } from "react";
-import { useCountryDataFetch } from "../rest-countries-data/useCountryDataFetch";
-import { CountryDetailedInfoContent } from "./CountryDetailedInfoContent";
-import { Drawer } from "vaul";
 import { cn } from "@/shared/shadcn/lib/utils";
+import { ErrorBubble } from "@/shared/ui/ErrorBubble";
+import { LoaderSpinner } from "@/shared/ui/LoaderSpinner";
+import { SquareMenu } from "lucide-react";
+import { FC } from "react";
+import { Drawer } from "vaul";
+import {
+	RestCountryData,
+	useCountryDataFetch,
+} from "../../features/rest-countries-data/useCountryDataFetch";
+import { CountryDetailedInfoContent } from "./CountryDetailedInfoContent";
 
 export const CountryContextBar: FC<{ countryId: string }> = ({ countryId }) => {
 	const { data, loading, error } = useCountryDataFetch(countryId, ["name", "flag"]);
 
-	if (error) return <BarContainer>{error}</BarContainer>;
+	if (error) return <ErrorBubble error={error.message} className="w-full"/>;
 
 	if (!data || loading) {
 		return (
-			<BarContainer>
-				{/* <span className="text-[1.3em] pl-1.5 pr-2">{data.flag}</span> */}
-				<div className="pl-1.5 flex items-center justify-center">
-					<Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-				</div>
-				<span className="pl-1.5 flex-grow">{countryId}</span>
-				<Button variant="secondary" disabled>
-					<SquareMenu />
-					Info
-				</Button>
-			</BarContainer>
+			<>
+				<LoaderSpinner />
+				<span className="pl-1.5 flex-grow text-muted-foreground">
+					{countryId}
+				</span>
+				<CountryInfoButton data={data} countryId={countryId} />
+			</>
 		);
 	}
 
 	return (
-		<BarContainer>
+		<>
 			<span className="text-[1.3em] pl-1.5 pr-2">{data.flag}</span>
 			<strong className="flex-grow pr-4">{data.name.common}</strong>
+			<CountryInfoButton data={data} countryId={countryId} />
+		</>
+	);
+};
+
+function CountryInfoButton({
+	data,
+	countryId,
+}: {
+	data?: Pick<RestCountryData, "name" | "flag"> | null;
+	countryId?: string;
+}) {
+	if (!data || !countryId)
+		return (
+			<Button variant="secondary" disabled>
+				<SquareMenu />
+				Info
+			</Button>
+		);
+
+	return (
+		<>
 			<div className="hidden md:block">
 				<Sheet>
 					<SheetTrigger asChild>
@@ -77,12 +100,23 @@ export const CountryContextBar: FC<{ countryId: string }> = ({ countryId }) => {
 							)}
 						>
 							<div className="mx-auto mt-4 h-1 w-[80px] rounded-full bg-foreground/50"></div>
-							<div className="w-full h-full p-3">
-								<Drawer.Title className="hidden">
-									{data.name.common}
-								</Drawer.Title>
-
-								<div className="w-full p-3 flex space-x-6 mt-6">
+							<div className="w-full h-full max-h-[90vh] p-3 overflow-scroll">
+								<div className="w-full p-3">
+									<Drawer.Title className="text-2xl font-bold">
+										{data.name.common}
+									</Drawer.Title>
+									<Drawer.Description
+										className={cn(
+											"text-base text-muted-foreground",
+											data.name.official !== data.name.common &&
+												"hidden"
+										)}
+									>
+										{data.name.official}
+									</Drawer.Description>
+									<div>
+										<hr className="mt-3 mb-2" />
+									</div>
 									<CountryDetailedInfoContent
 										className="w-full"
 										countryId={countryId}
@@ -93,14 +127,6 @@ export const CountryContextBar: FC<{ countryId: string }> = ({ countryId }) => {
 					</Drawer.Portal>
 				</Drawer.Root>
 			</div>
-		</BarContainer>
+		</>
 	);
-};
-
-const BarContainer: FC<PropsWithChildren> = ({ children }) => {
-	return (
-		<div className="fixed top-4 right-4 flex items-center bg-background border border-input rounded-lg p-2 min-w-72">
-			{children}
-		</div>
-	);
-};
+}

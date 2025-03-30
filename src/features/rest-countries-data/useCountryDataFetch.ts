@@ -1,4 +1,4 @@
-import { useFetch } from "../../shared/useFetch";
+import { useFetch } from "../../shared/lib/fetcher";
 
 const init: RequestInit = { mode: "cors" };
 
@@ -54,6 +54,7 @@ export type RestCountryData = {
 		svg: string;
 		alt: string;
 	};
+	alpha: string
 };
 
 export type RestCountryDataFields = keyof RestCountryData;

@@ -1,54 +1,96 @@
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Setup and run
+Install dependecies
+```
+npm i install
+```
+Run dev
+```
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Live demo
+Visit https://globe.vladkrutenyuk.ru
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## About
+
+`Vite.js`-based project with `typescript`, `react` and `tailwindcss` и использованием `shadcn/ui`, который на базе (`tailwindcss` и `radix-ui`).
+
+`Three.js` используется для 3Д в связке с моим собственно написанным `three-kvy-core` which is lightweight library enabling an elegant lifecycle management system and basic initializations. It empowers `Three.js` objects by reusable features within seamless context propagation with pluggable modules and provides structured logic.
+внутри для евентов исполльзуется `eventemitter3`. 
+
+**Structure**
+Структура проекта частично по методологии `FSD`. A иерархия для `core`-логики, где много императивной и ООП-логики,реализованна по собственной структуре, продиктованной `three-kvy-core` подходом, где есть глоабльный контекст, его модули, а также фичи объектов. `@/core/features`,`@/core/modules` и мастер-класс `AppCore`.
+
+**Globe map and countries selection**
+Карта отрисовывается вручную с помощью Canvas API и исопльзуется как текстура `THREE.CanvasTexture`. Для этого у меня подготовлен статический `world.geo.json`, котоырй предоставляет координаты геометрии границ стран.
+
+Выделение и другие перерисовки также через canvas api.
+
+Определение выбранной страны происходит, с помощью второй (на основе того же geo-json) канвас-текстуры, на которой каждая страна раскрашена в свой уникальный цвет (а-ля `id-color`). Это текстура визуально не отображается. При клике выпускается `raycast`, который определяет `intersection` с мешем глобуса, откуда можно взять `uv`-кординаты точки куда мы "попали".
+
+по той координате смотрю какой цвет находится в id-color текстуре и определяю что за страна была нажата.
+
+**Globe Click Effect 3D**
+Было сказано реализовать какую-нибудь анимацию в 3D.
+
+При клику на глобус (с помощью выше упомянутого `raycast`) также получаю `point` и `normal` этого `intersection`.
+Распологая объект на поверхности и вызываю анимацию, используя `tween.js`. Который скейлит и уводит в прозрачность кольцо.
+
+Это кольцо это plane-mesh (quad) на котором нарисовано кольцо в glsl-шейдере по принципу SDF. Так что колечко это процедурное, без какой либо текстуры.
+
+**Globe appereance**
+Помимио смешивания и раскрашивания канвас-текстур, внещний вид глобуса определяется кастомными самописными glsl-шейдерам.
+
+Заднее свечение сделано с помощью `Spite`, который работает как billboard и всегда ориентирован лицом к камере. И для него написано glsl-шейдер чтоб создать `fade` через радиельный градиент.
+
+На сам материал глобуса был написан glsl-шейдер с fresnel, чтбы создать эффект атмосферы
+
+И для объема я добавил directional light который всегда светит из позиции камеры и создавая небольшой затеменние внизу глоубса. Это не затратно по производительности тк тени не включены. 
+
+
+**Fetch countries data**
+
+для запросов я написал собественную утилитку `@shared/lib/fetcher` c хуком `useFetch`. Не стал использовать какие-то готовые решения. Решил использовать встроенный нативный `fetch` и самому всё обрабатывать чтобы продемонстрировать свое понимания.
+
+при выборе страны я подтягиваю только информацию об имени и емодзи-флаг по alpha-code.
+детальную информацию подтягиваю, когда вызывается открывается соответсвующий компонент по кнопке.
+
+
+**Dark-Light theme toggling**
+
+Реализовано переключение темной и светлой темы, что также затрагивает и 3D сцену.
+
+
+**Design**
+Какие-то эффектные реалистичные визуалы в рамках такого короткого времени трудно достижимы, поэтому выбрал более минималистичный подход с нейтральными цветами.
+
+Есть базовая дизайн система цветов для светлой и темной темы.
+Частинчо спользовал компоненты из `shadcn/ui`
+
+Основной ui-компонент, который представлен, это тот, что показывает детальную информацию о выбранной стране. Для декстоп версии используется выплывающий слева "Sheet". А для мобильный всем привычный "Drawer" снизу (использую для того `vaul` пакет).
+Имеется skeleton если информация не успела загрузится.
+
+Также на мобильной веросии контекстный бар с выбранной страной перемещается вниз, тк я считаю ставить навигационные/контрол элементы вверх на мобилках это издавательство и неудобно постояно пальцем тянуться. всё основное должно быть внизу. второстепенное и не часто нажимамое можно поставить навверх (например переключение темы).
+
+**State management**
+Не видел обходимости использовать какой-то конкретный стейт менеджмент в рамках задач, что делал. Особенно с учетом малого кол-ва времени добавлял что-то только по надобносоти.
+
+Даже если брать во внимание поиск и фильтры (который я не успел сделать), то там лишь достаточно реализовать локальное каширование с помощью `idk-keyval`/`localforage`. Или же использовать `@tanstack/react-query`
+
+---
+
+**`//TODO: Search functionality to find countries by name`**
+- нужно определить как будет распологаться search-bar
+- и где будет выводиться результат
+- сделать ui компоненты для всего этого
+- запрос на /name/${searchNameInput}?fields=name,flag,alpha
+- айтема в реазльутате поиска выводят имя и флаг и альфа код
+- при нажатии на айтем выбирается (через `useGlobeSelectedCountryId()`) соотв страна по альфа коду
+
+**`//TODO: Filter countries by region, population, or another meaningful metric`**
+- аналогично выше описанный подход
+
+
+
+
