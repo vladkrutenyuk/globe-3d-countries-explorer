@@ -1,4 +1,3 @@
-"use client";
 import { FC, HTMLAttributes, useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
 import { Button } from "@/shared/shadcn/components/ui/button";

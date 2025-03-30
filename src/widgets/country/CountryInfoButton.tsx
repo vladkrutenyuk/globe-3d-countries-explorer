@@ -62,11 +62,11 @@ export const CountryInfoButton: FC<{
 						<Drawer.Overlay className="fixed inset-0 bg-background/80" />
 						<Drawer.Content
 							className={cn(
-								"fixed bottom-0 left-0 right-0 mt-24 rounded-t-[10px] bg-background border z-50"
+								"fixed bottom-0 left-0 right-0 rounded-t-[10px] bg-background border z-50"
 							)}
 						>
-							<div className="mx-auto mt-4 h-1 w-[80px] rounded-full bg-foreground/50"></div>
-							<div className="w-full h-full max-h-[90vh] p-3 overflow-scroll">
+							<div className="mx-auto mt-4 mb-6 h-1 w-[80px] rounded-full bg-foreground/50"></div>
+							<div className="w-full h-[75vh] p-3 overflow-scroll">
 								<div className="w-full p-3">
 									<Drawer.Title className="text-2xl font-bold">
 										{data.name.common}

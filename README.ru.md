@@ -81,6 +81,8 @@ Visit https://globe.vladkrutenyuk.ru/
 
 ---
 
+## TODO
+
 **`//TODO: Search functionality to find countries by name`**
 - нужно определить как будет распологаться search-bar
 - и где будет выводиться результат
@@ -92,6 +94,9 @@ Visit https://globe.vladkrutenyuk.ru/
 **`//TODO: Filter countries by region, population, or another meaningful metric`**
 - аналогично выше описанный подход
 
-
+## Improvements
+- Выставить параметры для orbit controls (max min)
+- Не всегда клик срабатывает Оззи орбит контролов - улучшить
+- country details content иногад не умешается если маленькая высота окна, нужно норм натсроить
 
 
