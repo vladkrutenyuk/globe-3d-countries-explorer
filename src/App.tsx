@@ -8,7 +8,7 @@ function App() {
 	return (
 		<main
 			data-vaul-drawer-wrapper
-			className="w-screen h-screen h-[100svh] overflow-hidden relative"
+			className="w-screen h-[100svh] md:h-screen overflow-hidden relative"
 		>
 			<AppCoreProvider
 				loading={<LoadingScreen className="absolute top-0 left-0" />}

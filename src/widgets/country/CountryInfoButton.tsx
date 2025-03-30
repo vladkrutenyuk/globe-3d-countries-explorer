@@ -66,7 +66,7 @@ export const CountryInfoButton: FC<{
 							)}
 						>
 							<div className="mx-auto mt-4 mb-6 h-1 w-[80px] rounded-full bg-foreground/50"></div>
-							<div className="w-full h-[75vh] p-3 overflow-scroll">
+							<div className="w-full h-[80vh] p-3 overflow-scroll">
 								<div className="w-full p-3">
 									<Drawer.Title className="text-2xl font-bold">
 										{data.name.common}
