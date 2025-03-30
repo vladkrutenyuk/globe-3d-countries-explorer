@@ -1,96 +1,122 @@
-## Setup and run
-Install dependecies
-```
-npm i install
-```
-Run dev
-```
+# He, there! It's 3D Interactive Globe with countries info
+## Setup and Run  
+
+**Install dependencies**
+```sh
+npm install
+```  
+**Run development server**
+```sh
 npm run dev
-```
+```  
 
-## Live demo
-Visit https://globe.vladkrutenyuk.ru/
-
-
-## About
-
-`Vite.js`-based project with `typescript`, `react` and `tailwindcss` и использованием `shadcn/ui`, который на базе (`tailwindcss` и `radix-ui`).
-
-`Three.js` используется для 3Д в связке с моим собственно написанным `three-kvy-core` which is lightweight library enabling an elegant lifecycle management system and basic initializations. It empowers `Three.js` objects by reusable features within seamless context propagation with pluggable modules and provides structured logic.
-внутри для евентов исполльзуется `eventemitter3`. 
-
-**Structure**
-Структура проекта частично по методологии `FSD`. A иерархия для `core`-логики, где много императивной и ООП-логики,реализованна по собственной структуре, продиктованной `three-kvy-core` подходом, где есть глоабльный контекст, его модули, а также фичи объектов. `@/core/features`,`@/core/modules` и мастер-класс `AppCore`.
-
-**Globe map and countries selection**
-Карта отрисовывается вручную с помощью Canvas API и исопльзуется как текстура `THREE.CanvasTexture`. Для этого у меня подготовлен статический `world.geo.json`, котоырй предоставляет координаты геометрии границ стран.
-
-Выделение и другие перерисовки также через canvas api.
-
-Определение выбранной страны происходит, с помощью второй (на основе того же geo-json) канвас-текстуры, на которой каждая страна раскрашена в свой уникальный цвет (а-ля `id-color`). Это текстура визуально не отображается. При клике выпускается `raycast`, который определяет `intersection` с мешем глобуса, откуда можно взять `uv`-кординаты точки куда мы "попали".
-
-по той координате смотрю какой цвет находится в id-color текстуре и определяю что за страна была нажата.
-
-**Globe Click Effect 3D**
-Было сказано реализовать какую-нибудь анимацию в 3D.
-
-При клику на глобус (с помощью выше упомянутого `raycast`) также получаю `point` и `normal` этого `intersection`.
-Распологая объект на поверхности и вызываю анимацию, используя `tween.js`. Который скейлит и уводит в прозрачность кольцо.
-
-Это кольцо это plane-mesh (quad) на котором нарисовано кольцо в glsl-шейдере по принципу SDF. Так что колечко это процедурное, без какой либо текстуры.
-
-**Globe appereance**
-Помимио смешивания и раскрашивания канвас-текстур, внещний вид глобуса определяется кастомными самописными glsl-шейдерам.
-
-Заднее свечение сделано с помощью `Spite`, который работает как billboard и всегда ориентирован лицом к камере. И для него написано glsl-шейдер чтоб создать `fade` через радиельный градиент.
-
-На сам материал глобуса был написан glsl-шейдер с fresnel, чтбы создать эффект атмосферы
-
-И для объема я добавил directional light который всегда светит из позиции камеры и создавая небольшой затеменние внизу глоубса. Это не затратно по производительности тк тени не включены. 
-
-
-**Fetch countries data**
-
-для запросов я написал собественную утилитку `@shared/lib/fetcher` c хуком `useFetch`. Не стал использовать какие-то готовые решения. Решил использовать встроенный нативный `fetch` и самому всё обрабатывать чтобы продемонстрировать свое понимания.
-
-при выборе страны я подтягиваю только информацию об имени и емодзи-флаг по alpha-code.
-детальную информацию подтягиваю, когда вызывается открывается соответсвующий компонент по кнопке.
-
-
-**Dark-Light theme toggling**
-
-Реализовано переключение темной и светлой темы, что также затрагивает и 3D сцену.
-
-
-**Design**
-Какие-то эффектные реалистичные визуалы в рамках такого короткого времени трудно достижимы, поэтому выбрал более минималистичный подход с нейтральными цветами.
-
-Есть базовая дизайн система цветов для светлой и темной темы.
-Частинчо спользовал компоненты из `shadcn/ui`
-
-Основной ui-компонент, который представлен, это тот, что показывает детальную информацию о выбранной стране. Для декстоп версии используется выплывающий слева "Sheet". А для мобильный всем привычный "Drawer" снизу (использую для того `vaul` пакет).
-Имеется skeleton если информация не успела загрузится.
-
-Также на мобильной веросии контекстный бар с выбранной страной перемещается вниз, тк я считаю ставить навигационные/контрол элементы вверх на мобилках это издавательство и неудобно постояно пальцем тянуться. всё основное должно быть внизу. второстепенное и не часто нажимамое можно поставить навверх (например переключение темы).
-
-**State management**
-Не видел обходимости использовать какой-то конкретный стейт менеджмент в рамках задач, что делал. Особенно с учетом малого кол-ва времени добавлял что-то только по надобносоти.
-
-Даже если брать во внимание поиск и фильтры (который я не успел сделать), то там лишь достаточно реализовать локальное каширование с помощью `idk-keyval`/`localforage`. Или же использовать `@tanstack/react-query`
+## Live Demo  
+Visit: [globe.vladkrutenyuk.ru](https://globe.vladkrutenyuk.ru/)  
 
 ---
 
+## About  
+
+This project is built with `Vite.js`, `TypeScript`, `React`, and `TailwindCSS`, integrating `shadcn/ui`, which is based on `TailwindCSS` and `Radix UI`.  
+
+For 3D rendering, `Three.js` is used in combination with my custom library, `three-kvy-core`—a lightweight solution that provides an elegant lifecycle management system and fundamental initializations. It enhances `Three.js` objects with reusable features, seamless context propagation, and a modular architecture for structured logic.  
+
+Event handling is managed using `eventemitter3`.  
+
+---
+
+## Project Structure  
+
+The project structure partially follows the `FSD` methodology. However, the core logic, which includes a significant amount of imperative and OOP-based logic, follows a custom architecture driven by the `three-kvy-core` approach. It introduces a global context with modules and object features, structured within:  
+- `@/core/features`  
+- `@/core/modules`  
+- The main class `AppCore`  
+
+---
+
+## Globe Map and Country Selection  
+
+The globe is rendered manually using the Canvas API, and a `THREE.CanvasTexture` is created from it. The world geometry is based on a static `world.geo.json`, which provides country border coordinates.  
+
+Selection and redrawing are also handled through the Canvas API.  
+
+To determine the selected country, an additional canvas texture is used, where each country is assigned a unique color (acting as an ID). This texture is not visible. When a user clicks on the globe, a `raycast` determines the `intersection` with the globe mesh, allowing extraction of the `UV` coordinates of the clicked point.  
+
+Using these coordinates, the system retrieves the color from the ID-texture and identifies the selected country.  
+
+---
+
+## Globe Click Effect (3D)  
+It was said to implement some animation in 3D.
+A 3D animation effect was implemented upon globe interaction.  
+
+When a user clicks on the globe, a `raycast` determines the `intersection` point and `normal` of the surface. Based on this, an animated effect is triggered using `tween.js`, where a ring scales up and fades out.  
+
+The ring itself is a `PlaneMesh (quad)`, procedurally rendered in GLSL using Signed Distance Fields (SDF), eliminating the need for a texture.  
+
+---
+
+## Globe Appearance  
+
+In addition to texture blending and colorization via canvas textures, the globe’s appearance is defined through custom GLSL shaders:  
+
+- **Outer Glow**: Implemented using a `Sprite` that always faces the camera (billboard). A custom GLSL shader applies a radial gradient to create a fading glow effect.  
+- **Atmosphere Effect**: A Fresnel-based GLSL shader is applied to the globe material to simulate an atmospheric glow.  
+- **Subtle Shadowing**: A `Directional Light` is positioned relative to the camera to create slight darkening at the globe’s lower region. This is an efficient approach since shadows are disabled.  
+
+---
+
+## Fetching Country Data  
+
+A custom utility `@shared/lib/fetcher` with the `useFetch` hook is used for API requests. Instead of relying on external libraries, I opted for native `fetch`, handling responses manually to showcase my understanding.  
+
+- Initially, only the country name and emoji flag (retrieved via alpha-code) are loaded.  
+- Detailed country information is fetched only when the user opens the corresponding details panel.  
+
+---
+
+## Dark-Light Theme Toggling  
+
+The app supports both dark and light themes, which also affect the 3D scene appearance.  
+
+---
+
+## UI & Design  
+
+Given the time constraints, achieving high-fidelity realistic visuals wasn't feasible. Instead, I focused on a **minimalistic approach with neutral colors**.  
+
+- A basic **design system** (css var colors) was implemented for both light and dark themes.  
+- Some UI components were adapted from `shadcn/ui`.  
+
+The main UI component was implemented is the one about country details
+- **Desktop:** A sidebar (`Sheet`) slides in from the left.  
+- **Mobile:** A bottom drawer (`Drawer`) is used (powered by `vaul`).  
+- **Loading State:** A skeleton UI is displayed if data isn't ready yet.  
+
+### Mobile UX Considerations  
+- The contextual country bar is positioned at the bottom for easy reach.  
+- Essential controls are placed lower on the screen, while secondary options (e.g., theme toggling) are positioned at the top, minimizing user effort.  
+
+---
+
+## State Management  
+
+Given the project scope and time limitations, I did not see a strong need for a dedicated state management library. Instead, state was handled as needed.  
+
+For features like **search and filtering** (which I didn't have time to implement), local caching using `idb-keyval` / `localforage` would suffice. Alternatively, `@tanstack/react-query` could be used.  
+
+---
+
+## TODO  
+
 **`//TODO: Search functionality to find countries by name`**
-- нужно определить как будет распологаться search-bar
-- и где будет выводиться результат
-- сделать ui компоненты для всего этого
-- запрос на /name/${searchNameInput}?fields=name,flag,alpha
-- айтема в реазльутате поиска выводят имя и флаг и альфа код
-- при нажатии на айтем выбирается (через `useGlobeSelectedCountryId()`) соотв страна по альфа коду
+- Define the placement of the search bar.  
+- Decide how and where search results should be displayed.  
+- Create UI components for search results.  
+- Implement an API request: `/name/${searchQuery}?fields=name,flag,alpha`.  
+- Search result items should display the country name, flag, and alpha code.  
+- Clicking a result should select the country via `useGlobeSelectedCountryId()`.  
 
 **`//TODO: Filter countries by region, population, or another meaningful metric`**
-- аналогично выше описанный подход
-
-
-
-
+- Implement filtering by region, population, or another relevant metric.  
+- Follow a similar approach to search functionality.  
