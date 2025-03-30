@@ -10,6 +10,10 @@ export class GlobeMap {
 	idCanvasCtx: CanvasRenderingContext2D;
 	idTexture: THREE.CanvasTexture;
 
+	highlightCanvas: HTMLCanvasElement;
+	highlightCanvasCtx: CanvasRenderingContext2D;
+	highlightTexture: THREE.CanvasTexture;
+
 	width = 4096;
 	height = 4096;
 
@@ -22,17 +26,22 @@ export class GlobeMap {
 		this.canvas = canvas;
 		this.canvasCtx = canvas.getContext("2d")!;
 		this.canvasCtx.imageSmoothingEnabled = false;
-		const texture = new THREE.CanvasTexture(canvas);
-		this.texture = texture;
+		this.texture = new THREE.CanvasTexture(canvas);
 
 		const idCanvas = document.createElement("canvas");
 		idCanvas.width = this.width;
 		idCanvas.height = this.height;
 		this.idCanvas = idCanvas;
-		this.idCanvasCtx = idCanvas.getContext("2d")!;
+		this.idCanvasCtx = idCanvas.getContext("2d", { willReadFrequently: true })!;
 		this.idCanvasCtx.imageSmoothingEnabled = false;
-		const idTexture = new THREE.CanvasTexture(idCanvas);
-		this.idTexture = idTexture;
+		this.idTexture = new THREE.CanvasTexture(idCanvas);
+
+		const highlightCanvas = document.createElement("canvas");
+		highlightCanvas.width = this.width;
+		highlightCanvas.height = this.height;
+		this.highlightCanvas = highlightCanvas;
+		this.highlightCanvasCtx = highlightCanvas.getContext("2d")!;
+		this.highlightTexture = new THREE.CanvasTexture(highlightCanvas);
 	}
 
 	initByGeojson(geojson: GeoJsonFeatureCollection, countryIdPropKey: string) {
@@ -41,7 +50,17 @@ export class GlobeMap {
 	}
 
 	dispose() {
-		//TODO globe map dispose method
+		this.texture.dispose();
+		this.idTexture.dispose();
+		this.highlightTexture.dispose();
+	
+		const instance = this as Partial<typeof this>;
+		instance.canvas = undefined;
+		instance.canvasCtx = undefined;
+		instance.idCanvasCtx = undefined;
+		instance.idCanvas = undefined;
+		instance.highlightCanvas = undefined;
+		instance.highlightCanvasCtx = undefined;
 	}
 
 	getCountryIdAtUvClick(uv: THREE.Vector2Like) {
@@ -58,12 +77,12 @@ export class GlobeMap {
 		return this._countryByIdColors[key]
 	}
 
-	fillCountryByFeature(feature: GeoJsonFeature, color: string) {
-		const ctx = this.canvasCtx;
+	highlightCountry(feature: GeoJsonFeature, color: string) {
+		const ctx = this.highlightCanvasCtx;
 
 		ctx.fillStyle = color;
 		this.drawGeoFeature(ctx, feature);
-		this.texture.needsUpdate = true;
+		this.highlightTexture.needsUpdate = true;
 	}
 
 	private drawMap(geojson: GeoJsonFeatureCollection) {
@@ -82,7 +101,6 @@ export class GlobeMap {
 		const idCanvas = this.idCanvas;
 		const idCtx = this.idCanvasCtx;
 
-		// [2] - draw id map
 		idCtx.clearRect(0, 0, idCanvas.width, idCanvas.height);
 
 		for (let i = 0; i < geojson.features.length; i++) {

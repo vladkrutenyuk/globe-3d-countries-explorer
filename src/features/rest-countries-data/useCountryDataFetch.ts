@@ -1,6 +1,5 @@
 import { useFetch } from "../../shared/useFetch";
 
-// const fields = ["name",  "currencies", "capital", "capitalInfo", "area", "population", ] as const satisfies (keyof RestCountryData)[];
 const init: RequestInit = { mode: "cors" };
 
 export const useCountryDataFetch = <F extends RestCountryDataFields = RestCountryDataFields>(

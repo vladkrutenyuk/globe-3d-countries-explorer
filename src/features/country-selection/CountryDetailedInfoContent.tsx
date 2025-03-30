@@ -120,15 +120,11 @@ export const CountryDetailedInfoContent: FC<
 				</div>
 			</Content>
 
-			<hr className="mt-6 mb-6" />
+			<hr className="mt-6 mb-6 w-full" />
 			<Content>
-				<div className="flex space-x-2 mt-2">
-					<a href={data.maps.googleMaps} target="_blank">
-						<Button variant="outline">Google Maps</Button>
-					</a>
-					<a href={data.maps.openStreetMaps} target="_blank">
-						<Button variant="outline">OpenStreetMap</Button>
-					</a>
+				<div className="w-full flex space-x-2 mt-2 [&>*]:flex-shrink-0 [&>*]:flex-grow">
+                    <LinkBtn href={data.maps.googleMaps}>Google Maps</LinkBtn>
+                    <LinkBtn href={data.maps.openStreetMaps}>OpenStreetMap</LinkBtn>
 				</div>
 			</Content>
 		</div>
@@ -148,5 +144,15 @@ function Code(props: PropsWithChildren) {
 		<code className="text-[0.84em] bg-muted rounded px-1 py-0.5">
 			{props.children}
 		</code>
+	);
+}
+
+function LinkBtn(props: PropsWithChildren & { href: string }) {
+	return (
+		<a href={props.href} target="_blank">
+			<Button className="w-full" variant="outline">
+				{props.children}
+			</Button>
+		</a>
 	);
 }

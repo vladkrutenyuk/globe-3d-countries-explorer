@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-//TODO client local cashing via localForage or idb-keyval
+/**
+ * Custom hook to make requests through `fetch` and json data response.
+ * Including all states handling and cancellation on unmount by url deps
+ */
 export function useFetch<T>(url: RequestInfo | URL, init?: RequestInit) {
 	const requestInitRef = useRef(init);
 	const [data, setData] = useState<T | null>(null);
@@ -16,12 +19,7 @@ export function useFetch<T>(url: RequestInfo | URL, init?: RequestInit) {
 		setLoading(true);
 		setError(null);
 
-		fetch(url, { signal, ...init })
-			.then((res) => {
-				//TODO build custom error with info data and status and code etc
-				if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-				return res.json();
-			})
+		fetcher(url, { signal, ...init })
 			.then(setData)
 			.catch((err) => {
 				if (err.name !== "AbortError") setError(err.message);
@@ -32,4 +30,24 @@ export function useFetch<T>(url: RequestInfo | URL, init?: RequestInit) {
 	}, [url]);
 
 	return { data, loading, error };
+}
+
+async function fetcher(url: RequestInfo | URL, init?: RequestInit) {
+	const res = await fetch(url, init);
+	const json = await res.json();
+	if (!res.ok) {
+		throw new FetchError(res, json);
+	}
+	return json;
+}
+
+export class FetchError extends Error {
+	status: number;
+	data: unknown;
+	constructor(res: Response, data: unknown) {
+		super(res.statusText);
+		this.status = res.status;
+		this.data = data;
+		this.name = "CustomFetchError";
+	}
 }

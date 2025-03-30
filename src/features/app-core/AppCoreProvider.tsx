@@ -14,7 +14,6 @@ export const AppCoreProvider: FC<PropsWithChildren> = ({ children }) => {
 		if (!appCore) return;
 
 		return () => {
-            console.error("appCore.ctx.destroy()")
 			appCore.ctx.destroy();
 		};
 	}, [appCore]);

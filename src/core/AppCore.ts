@@ -4,9 +4,9 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { Globe } from "./features/Globe";
 // import { GeoJsonManager } from "./modules/GeoJsonManager";
-import { PointerRaycasting } from "./modules/PointerRaycasting";
+import { WORLD_GEOJSON_URL } from "./config";
 import { GeoJsonManager } from "./modules/GeoJsonManager";
-import { plane } from "./features/RadialGradient";
+import { PointerRaycasting } from "./modules/PointerRaycasting";
 
 type AppAssets = {
 	geoJson: GeoJsonFeatureCollection;
@@ -17,13 +17,12 @@ export type AppCoreCtxModule = { pointer: PointerRaycasting; geoJson: GeoJsonMan
 export class AppCore extends EventEmitter {
 	static async loadAsync(): Promise<AppCore> {
 		const geoJson = (await (
-			await fetch("/world.geo.json")
+			await fetch(WORLD_GEOJSON_URL)
 		).json()) as GeoJsonFeatureCollection;
 
 		const assets: AppAssets = {
 			geoJson,
 		};
-        // saveMappedGeoJson(geoJson)
 		return new AppCore(assets);
 	}
 
@@ -41,7 +40,7 @@ export class AppCore extends EventEmitter {
 				pointer: new PointerRaycasting(),
 				geoJson: new GeoJsonManager(assets.geoJson, "adm0_a3"),
 			},
-			{ antialias: true, logarithmicDepthBuffer: true }
+			{ antialias: true }
 		);
 
 		this.ctx = ctx;
@@ -50,8 +49,6 @@ export class AppCore extends EventEmitter {
 		scene.background = new THREE.Color("rgb(16,16,16)");
 		const renderer = ctx.three.renderer;
 		renderer.setPixelRatio(window.devicePixelRatio);
-        plane.scale.setScalar(2.3)
-        scene.add(plane);
 
 		// globe
 		const globe = KVY.addFeature(new THREE.Group(), Globe);
@@ -65,6 +62,13 @@ export class AppCore extends EventEmitter {
 		const orbitControls = new OrbitControls(camera, renderer.domElement);
 		orbitControls.enablePan = false;
 		this.orbitControls = orbitControls;
+
+		// light
+		const dirLight = new THREE.DirectionalLight();
+		scene.add(camera);
+		camera.add(dirLight);
+		dirLight.position.y = 3;
+		dirLight.position.x = -1;
 
 		this.conciliateSceneControls();
 	}

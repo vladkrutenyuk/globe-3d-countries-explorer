@@ -1,5 +1,5 @@
 import { FC, HTMLAttributes, useEffect, useRef } from "react";
-import { useAppCore } from "./AppCoreContext";
+import { useAppCore } from "../features/app-core/AppCoreContext";
 
 export const Canvas: FC<HTMLAttributes<HTMLDivElement>> = (props) => {
 	const appCore = useAppCore();
