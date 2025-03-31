@@ -25,6 +25,8 @@ export class CameraController extends CoreContextModule<AppCoreCtxModule> {
 		camera.position.setScalar(2);
 		camera.lookAt(new THREE.Vector3());
 		const orbitControls = new OrbitControls(camera, ctx.three.renderer.domElement);
+        orbitControls.minDistance = 1.5;
+        orbitControls.maxDistance = 10;
 		orbitControls.enablePan = false;
 		this._orbitControls = orbitControls;
 
