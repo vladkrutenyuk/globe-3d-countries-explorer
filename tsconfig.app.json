@@ -13,6 +13,8 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
+    // JSON imports are typed by src/@types/json.d.ts
+    "resolveJsonModule": false,
 
     /* Linting */
     "strict": true,

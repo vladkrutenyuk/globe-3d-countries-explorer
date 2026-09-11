@@ -1,6 +1,8 @@
 import * as THREE from "three/webgpu";
 import { Object3DBehaviour } from "three-start";
-import { SCENE_COLORS } from "../config";
+import { $isDark } from "@/stores";
+import { SCENE_COLORS } from "../scene-colors";
+import van from "vanjs-core";
 
 type ColorRgbExpression = `rgb(${number},${number},${number})`;
 
@@ -20,11 +22,10 @@ export class GlobeMap extends Object3DBehaviour {
 	height = 4096;
 
 	private readonly _countryByIdColors: Partial<Record<ColorRgbExpression, string>> = {};
-	private _unwatchTheme?: () => void;
 
 	constructor() {
 		super();
-		const canvas = document.createElement("canvas");
+		const canvas = van.tags.canvas();
 		canvas.width = this.width;
 		canvas.height = this.height;
 		this.canvas = canvas;
@@ -32,7 +33,7 @@ export class GlobeMap extends Object3DBehaviour {
 		this.canvasCtx.imageSmoothingEnabled = false;
 		this.texture = new THREE.CanvasTexture(canvas);
 
-		const idCanvas = document.createElement("canvas");
+		const idCanvas = van.tags.canvas();
 		idCanvas.width = this.width;
 		idCanvas.height = this.height;
 		this.idCanvas = idCanvas;
@@ -40,7 +41,7 @@ export class GlobeMap extends Object3DBehaviour {
 		this.idCanvasCtx.imageSmoothingEnabled = false;
 		this.idTexture = new THREE.CanvasTexture(idCanvas);
 
-		const highlightCanvas = document.createElement("canvas");
+		const highlightCanvas = van.tags.canvas();
 		highlightCanvas.width = this.width;
 		highlightCanvas.height = this.height;
 		this.highlightCanvas = highlightCanvas;
@@ -51,33 +52,7 @@ export class GlobeMap extends Object3DBehaviour {
 	onAwake() {
 		const { geoJson } = this.modules;
 		this.drawMapId(geoJson.data, geoJson.countryIdPropKey);
-	}
-
-	onEnable() {
-		this._unwatchTheme = this.modules.themeMode.watch(this.onThemeChange);
-	}
-
-	onDisable() {
-		this._unwatchTheme?.();
-		this._unwatchTheme = undefined;
-	}
-
-	onDestroy() {
-		this.dispose();
-	}
-
-	dispose() {
-		this.texture.dispose();
-		this.idTexture.dispose();
-		this.highlightTexture.dispose();
-
-		const instance = this as Partial<typeof this>;
-		instance.canvas = undefined;
-		instance.canvasCtx = undefined;
-		instance.idCanvasCtx = undefined;
-		instance.idCanvas = undefined;
-		instance.highlightCanvas = undefined;
-		instance.highlightCanvasCtx = undefined;
+		$isDark.subscribe(this.onThemeChange);
 	}
 
 	getCountryIdAtUvClick(uv: THREE.Vector2Like) {

@@ -39,13 +39,6 @@ export class PointerRaycasting extends ContextModule<{
 		this._objs.push(obj);
 	}
 
-	unregisterObj(obj: THREE.Object3D) {
-		const objs = this._objs;
-		const index = objs.indexOf(obj);
-		if (index === -1) return;
-		objs.splice(index, 1);
-	}
-
 	skipNextClick() {
 		this._skipNextClick = true;
 	}

@@ -16,6 +16,7 @@
     "dotenv": "^16.4.7",
     "eventemitter3": "^5.0.4",
     "lucide": "^1.45.0",
+    "nanostores": "^1.5.3",
     "ssh2-sftp-client": "^12.0.0",
     "three": "^0.185.1",
     "three-start": "^0.1.3",

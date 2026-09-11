@@ -1,11 +1,11 @@
-import van, { type State, type StateView } from "vanjs-core";
+import van, { type State } from "vanjs-core";
 import { createElement, X } from "lucide";
 import { CountryInfo } from "./CountryInfo";
 
 const { button, div } = van.tags;
 
 /** Mounted once, `open` toggles it. Sidebar on desktop, bottom sheet on mobile (see app.css) */
-export const CountryInfoPanel = (countryId: StateView<string | null>, open: State<boolean>) => {
+export const CountryInfoPanel = (open: State<boolean>) => {
 	const close = () => {
 		open.val = false;
 	};
@@ -23,7 +23,7 @@ export const CountryInfoPanel = (countryId: StateView<string | null>, open: Stat
 				{ class: "btn btn-ghost btn-icon info-close", "aria-label": "Close", onclick: close },
 				createElement(X)
 			),
-			() => (countryId.val ? CountryInfo(countryId.val) : div())
+			CountryInfo()
 		)
 	);
 };

@@ -28,10 +28,11 @@ Event handling is managed using `eventemitter3`.
 ## Project Structure  
 
 The project structure partially follows the `FSD` methodology. However, the core logic, which includes a significant amount of imperative and OOP-based logic, follows the `three-start` approach: a shared context with modules and object components, structured within:  
-- `@/core/components`  
+- `@/core/components` (behaviours with their own TSL shaders)  
 - `@/core/modules`  
-- `@/core/shaders` (TSL)  
-- The main class `AppCore`  
+- The main class `World` (extends `ThreeStart`)  
+
+UI components live in `@/ui-components`. State shared between the 3D core and the UI (theme, selected country, the world instance) is kept in `nanostores` atoms (`@/stores`).  
 
 ---
 
@@ -67,11 +68,9 @@ In addition to texture blending and colorization via canvas textures, the globe�
 
 ---
 
-## Fetching Country Data  
+## Country Data  
 
-A custom utility `@shared/lib/fetcher` is used for requests. Instead of relying on external libraries, I opted for native `fetch`, handling responses manually to showcase my understanding.  
-
-Country data comes from a static `public/countries.json`: a trimmed subset of the [REST Countries](https://gitlab.com/restcountries/restcountries) dataset (MPL-2.0), keyed by ISO alpha-3 code. The public REST Countries API v1–v4 was shut down (v5 requires an API key), so the file is generated once with `node scripts/build-countries.mjs`. It is loaded on the first country selection and cached for later lookups.  
+Country data is a static `countries.json` imported as a JSON module via Vite: a trimmed subset of the [REST Countries](https://gitlab.com/restcountries/restcountries) dataset (MPL-2.0), keyed by ISO alpha-3 code. The public REST Countries API v1–v4 was shut down (v5 requires an API key), so the file is generated once with `node scripts/build-countries.mjs`. The world geometry (`world.geo.json`) is imported the same way, so there is no runtime fetching.  
 
 ---
 
@@ -91,7 +90,6 @@ Given the time constraints, achieving high-fidelity realistic visuals wasn't fea
 The main UI component was implemented is the one about country details. It is a single panel, mounted once and toggled by a class:
 - **Desktop:** A sidebar slides in from the left.  
 - **Mobile:** A bottom sheet slides up.  
-- **Loading State:** A skeleton UI is displayed if data isn't ready yet.  
 
 ### Mobile UX Considerations  
 - The contextual country bar is positioned at the bottom for easy reach.  
@@ -101,7 +99,7 @@ The main UI component was implemented is the one about country details. It is a 
 
 ## State Management  
 
-Given the project scope and time limitations, I did not see a strong need for a dedicated state management library. Instead, state was handled as needed.  
+Shared state is kept in tiny `nanostores` atoms (`@/stores`): theme, selected country and the loaded world. The 3D core subscribes to them directly, the UI mirrors them into `van.state`.  
 
 For features like **search and filtering** (which I didn't have time to implement), local caching using `idb-keyval` / `localforage` would suffice. Alternatively, `@tanstack/react-query` could be used.  
 

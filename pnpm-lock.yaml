@@ -17,6 +17,9 @@ importers:
       lucide:
         specifier: ^1.45.0
         version: 1.45.0
+      nanostores:
+        specifier: ^1.5.3
+        version: 1.5.3
       ssh2-sftp-client:
         specifier: ^12.0.0
         version: 12.1.1
@@ -778,6 +781,10 @@ packages:
     resolution: {integrity: sha512-Y2tUNy4ouw6tq5oDSKeQYGOyhkUBhNOcGV/02KC+6kd9eDGqdZd++mjMiIDilrBYvjEnCYvVtsuHCuP+okSfug==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  nanostores@1.5.3:
+    resolution: {integrity: sha512-rQLB6eV4f2AW/n3L0JmwCROpaisYy9EDEADvEFSd1C/qG8hB6O5TPlh9A791JRbJr4CnMQBzptDcvD9OR1+6WA==}
+    engines: {node: ^20.0.0 || >=22.0.0}
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
@@ -1622,6 +1629,8 @@ snapshots:
     optional: true
 
   nanoid@3.3.19: {}
+
+  nanostores@1.5.3: {}
 
   natural-compare@1.4.0: {}
 

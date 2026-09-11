@@ -1,5 +1,3 @@
-export const WORLD_GEOJSON_URL = "/world.geo.json"
-
 export const SCENE_COLORS = {
     dark: {
         background: "rgb(16,16,16)",

@@ -17,10 +17,6 @@ body {
 	outline-color: rgb(var(--ring) / 0.5);
 }
 
-.muted {
-	color: rgb(var(--muted-foreground));
-}
-
 /* layout */
 
 .app {
@@ -39,23 +35,6 @@ body {
 .canvas {
 	position: absolute;
 	inset: 0;
-}
-
-.screen {
-	position: absolute;
-	inset: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.screen-box {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 1rem;
-	border-radius: 0.375rem;
-	background: rgb(var(--muted));
 }
 
 /* button */
@@ -122,39 +101,7 @@ body {
 	color: rgb(var(--accent-foreground));
 }
 
-/* feedback */
-
-.spinner {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding-left: 0.375rem;
-	color: rgb(var(--muted-foreground));
-}
-
-.spinner svg {
-	width: 1.25rem;
-	height: 1.25rem;
-	animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-	to {
-		transform: rotate(360deg);
-	}
-}
-
-.skeleton {
-	border-radius: 0.375rem;
-	background: rgb(var(--primary) / 0.1);
-	animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-	50% {
-		opacity: 0.5;
-	}
-}
+/* error */
 
 .error-bubble {
 	padding: 0.25rem;
@@ -363,14 +310,4 @@ body {
 
 .info-links > * {
 	flex: 1 0 auto;
-}
-
-.skeleton-flag {
-	width: 100px;
-	height: 66px;
-}
-
-.skeleton-line {
-	width: 200px;
-	height: 1.25rem;
 }

@@ -1,7 +1,8 @@
 import * as THREE from "three/webgpu";
+import { distance, float, materialOpacity, smoothstep, uv, vec2 } from "three/tsl";
 import { Object3DBehaviour } from "three-start";
-import { SCENE_COLORS } from "../config";
-import { ring } from "../shaders/ring";
+import { $isDark } from "@/stores";
+import { SCENE_COLORS } from "../scene-colors";
 
 const DURATION = 0.6; // seconds
 const FROM = { scale: 0, opacity: 3 };
@@ -12,7 +13,6 @@ export class GlobeClickEffect extends Object3DBehaviour {
 	private _ringPlane!: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicNodeMaterial>;
 	/** seconds since click, negative while idle */
 	private _elapsed = -1;
-	private _unwatchTheme?: () => void;
 
 	onAwake() {
 		const root = this._root;
@@ -30,23 +30,10 @@ export class GlobeClickEffect extends Object3DBehaviour {
 		const ringPlane = new THREE.Mesh(_planeGeom, ringMat);
 		root.add(ringPlane);
 		this._ringPlane = ringPlane;
-	}
 
-	onEnable() {
-		const { cameraController, themeMode } = this.modules;
-		cameraController.orbitControls.addEventListener("change", this.onCameraChange);
+		this.modules.cameraController.orbitControls.addEventListener("change", this.onCameraChange);
 		this.onCameraChange();
-		this._unwatchTheme = themeMode.watch(this.onThemeChange);
-	}
-
-	onDisable() {
-		this.modules.cameraController.orbitControls.removeEventListener(
-			"change",
-			this.onCameraChange
-		);
-		this._unwatchTheme?.();
-		this._unwatchTheme = undefined;
-		this.stop();
+		$isDark.subscribe(this.onThemeChange);
 	}
 
 	onUpdate() {
@@ -61,11 +48,6 @@ export class GlobeClickEffect extends Object3DBehaviour {
 		plane.material.opacity = THREE.MathUtils.lerp(FROM.opacity, TO.opacity, k);
 
 		if (t === 1) this.stop();
-	}
-
-	onDestroy() {
-		this._root.removeFromParent();
-		this._ringPlane.material.dispose();
 	}
 
 	click(intersection: THREE.Intersection) {
@@ -90,8 +72,8 @@ export class GlobeClickEffect extends Object3DBehaviour {
 	}
 
 	private readonly onCameraChange = () => {
-		const distance = this.modules.cameraController.orbitControls.getDistance();
-		this._root.scale.setScalar(distance * 0.04);
+		const cameraDistance = this.modules.cameraController.orbitControls.getDistance();
+		this._root.scale.setScalar(cameraDistance * 0.04);
 	};
 
 	private readonly onThemeChange = (isDark: boolean) => {
@@ -103,3 +85,21 @@ export class GlobeClickEffect extends Object3DBehaviour {
 const zAxis = new THREE.Vector3(0, 0, 1);
 const _vt = new THREE.Vector3();
 const _planeGeom = new THREE.PlaneGeometry();
+
+/** Masks opacity to a ring centered in uv space. Sizes are in uv units. */
+function ring<T extends THREE.NodeMaterial>(
+	material: T,
+	params: { radius: number; thickness: number }
+): T {
+	const dist = distance(uv(), vec2(0.5));
+	const r = float(params.radius / 2);
+	const th = float(params.thickness / 2);
+
+	const circle = smoothstep(r, r.add(0.01), dist).oneMinus();
+	const inner = smoothstep(r.sub(th), r.sub(th).add(0.01), dist);
+
+	// opacity is tweened from above 1 – saturate, since scenePass renders into
+	// a float target where alpha is not clamped to [0, 1] before blending
+	material.opacityNode = materialOpacity.mul(circle.mul(inner)).saturate();
+	return material;
+}
