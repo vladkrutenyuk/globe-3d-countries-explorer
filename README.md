@@ -17,7 +17,7 @@ Visit: [globe.vladkrutenyuk.ru](https://globe.vladkrutenyuk.ru/)
 
 ## About  
 
-This project is built with `Vite.js`, `TypeScript`, `React`, and `TailwindCSS`, integrating `shadcn/ui`, which is based on `TailwindCSS` and `Radix UI`.  
+This project is built with `Vite.js` and `TypeScript`. The UI is written with [`VanJS`](https://vanjs.org) (`vanjs-core`)—tiny reactive components on plain DOM—and styled with plain CSS (`@/styles`).  
 
 For 3D rendering, `Three.js` (`WebGPURenderer` with automatic WebGL2 fallback) is used in combination with my library, [`three-start`](https://three-start.com)—a minimal foundation layer that handles the bootstrap (renderer, scene, camera, loop, resize) and provides a unified lifecycle: components (`Object3DBehaviour`) attached to `Three.js` objects and global context modules (`ContextModule`).  
 
@@ -69,7 +69,7 @@ In addition to texture blending and colorization via canvas textures, the globe�
 
 ## Fetching Country Data  
 
-A custom utility `@shared/lib/fetcher` with the `useFetch` hook is used for API requests. Instead of relying on external libraries, I opted for native `fetch`, handling responses manually to showcase my understanding.  
+A custom utility `@shared/lib/fetcher` is used for requests. Instead of relying on external libraries, I opted for native `fetch`, handling responses manually to showcase my understanding.  
 
 Country data comes from a static `public/countries.json`: a trimmed subset of the [REST Countries](https://gitlab.com/restcountries/restcountries) dataset (MPL-2.0), keyed by ISO alpha-3 code. The public REST Countries API v1–v4 was shut down (v5 requires an API key), so the file is generated once with `node scripts/build-countries.mjs`. It is loaded on the first country selection and cached for later lookups.  
 
@@ -86,11 +86,11 @@ The app supports both dark and light themes, which also affect the 3D scene appe
 Given the time constraints, achieving high-fidelity realistic visuals wasn't feasible. Instead, I focused on a **minimalistic approach with neutral colors**.  
 
 - A basic **design system** (css var colors) was implemented for both light and dark themes.  
-- Some UI components were adapted from `shadcn/ui`.  
+- UI components are plain `VanJS` functions styled with plain CSS; icons come from `lucide`.  
 
-The main UI component was implemented is the one about country details
-- **Desktop:** A sidebar (`Sheet`) slides in from the left.  
-- **Mobile:** A bottom drawer (`Drawer`) is used (powered by `vaul`).  
+The main UI component was implemented is the one about country details. It is a single panel, mounted once and toggled by a class:
+- **Desktop:** A sidebar slides in from the left.  
+- **Mobile:** A bottom sheet slides up.  
 - **Loading State:** A skeleton UI is displayed if data isn't ready yet.  
 
 ### Mobile UX Considerations  
@@ -115,7 +115,7 @@ For features like **search and filtering** (which I didn't have time to implemen
 - Create UI components for search results.  
 - Implement an API request: `/name/${searchQuery}?fields=name,flag,alpha`.  
 - Search result items should display the country name, flag, and alpha code.  
-- Clicking a result should select the country via `useGlobeSelectedCountryId()`.  
+- Clicking a result should select the country via `appCore.globe.selectCountry()`.  
 
 **`//TODO: Filter countries by region, population, or another meaningful metric`**
 - Implement filtering by region, population, or another relevant metric.  
