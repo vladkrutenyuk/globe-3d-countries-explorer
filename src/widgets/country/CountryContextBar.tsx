@@ -7,7 +7,7 @@ import {
 import { CountryInfoButton } from "./CountryInfoButton";
 
 export const CountryContextBar: FC<{ countryId: string }> = ({ countryId }) => {
-	const { data, loading, error } = useCountryDataFetch(countryId, ["name", "flag"]);
+	const { data, loading, error } = useCountryDataFetch(countryId);
 
 	if (error) return <ErrorBubble error={error.message} className="w-full"/>;
 

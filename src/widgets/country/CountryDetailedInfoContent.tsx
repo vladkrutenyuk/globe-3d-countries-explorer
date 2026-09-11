@@ -1,31 +1,13 @@
 import { FC, HTMLAttributes, PropsWithChildren } from "react";
-import {
-	RestCountryDataFields,
-	useCountryDataFetch,
-} from "../../features/rest-countries-data/useCountryDataFetch";
+import { useCountryDataFetch } from "../../features/rest-countries-data/useCountryDataFetch";
 import { Button } from "@/shared/shadcn/components/ui/button";
 import { Skeleton } from "@/shared/shadcn/components/ui/skeleton";
 import { ErrorBubble } from "@/shared/ui/ErrorBubble";
 
-const fields: RestCountryDataFields[] = [
-	"name",
-	"population",
-	"area",
-	"capital",
-	"capitalInfo",
-	"region",
-	"maps",
-	"subregion",
-	"flag",
-	"flags",
-	"tld",
-	"currencies",
-];
-
 export const CountryDetailedInfoContent: FC<
 	HTMLAttributes<HTMLDivElement> & { countryId: string }
 > = ({ countryId, ...props }) => {
-	const { data, loading, error } = useCountryDataFetch(countryId, fields);
+	const { data, loading, error } = useCountryDataFetch(countryId);
 
 	if (error) return <ErrorBubble error={error.message} className="mt-4" />;
 

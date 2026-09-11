@@ -71,8 +71,7 @@ In addition to texture blending and colorization via canvas textures, the globeâ
 
 A custom utility `@shared/lib/fetcher` with the `useFetch` hook is used for API requests. Instead of relying on external libraries, I opted for native `fetch`, handling responses manually to showcase my understanding.  
 
-- Initially, only the country name and emoji flag (retrieved via alpha-code) are loaded.  
-- Detailed country information is fetched only when the user opens the corresponding details panel.  
+Country data comes from a static `public/countries.json`: a trimmed subset of the [REST Countries](https://gitlab.com/restcountries/restcountries) dataset (MPL-2.0), keyed by ISO alpha-3 code. The public REST Countries API v1â€“v4 was shut down (v5 requires an API key), so the file is generated once with `node scripts/build-countries.mjs`. It is loaded on the first country selection and cached for later lookups.  
 
 ---
 
