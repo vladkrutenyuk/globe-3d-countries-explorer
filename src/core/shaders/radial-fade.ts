@@ -1,24 +1,9 @@
-import * as THREE from "three";
-import { enableUv } from "./uv";
-import { glsl } from "./_glsl";
+import * as THREE from "three/webgpu";
+import { distance, materialOpacity, smoothstep, uv, vec2 } from "three/tsl";
 
-export function radialFade(mat: THREE.SpriteMaterial) {
-    mat.onBeforeCompile = (program) => {
-        enableUv(program);
-
-        program.fragmentShader = program.fragmentShader.replace(
-            glsl`#include <opaque_fragment>`,
-           glsl`        
-                #include <opaque_fragment>
-    
-                vec2 _center = vec2(0.5, 0.5);
-                float _dist = distance(vUv, _center);
-                float _alpha = smoothstep(0.5, 0.1, _dist);
-        
-                gl_FragColor.a *= _alpha;
-              `
-        );
-    };
-    return mat
+/** Fades opacity out from the uv center: opaque up to 0.1, transparent from 0.5. */
+export function radialFade<T extends THREE.NodeMaterial>(material: T): T {
+	const dist = distance(uv(), vec2(0.5));
+	material.opacityNode = materialOpacity.mul(smoothstep(0.1, 0.5, dist).oneMinus());
+	return material;
 }
-

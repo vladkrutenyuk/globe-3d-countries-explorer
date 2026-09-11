@@ -1,43 +1,38 @@
-import * as KVY from "@vladkrutenyuk/three-kvy-core";
-import * as THREE from "three";
+import * as THREE from "three/webgpu";
+import { ContextModule } from "three-start";
 
-export class PointerRaycasting extends KVY.CoreContextModule<{
+export class PointerRaycasting extends ContextModule<{
 	click: [intersection?: THREE.Intersection];
 	hover: [intersection: THREE.Intersection];
 }> {
-	private _objs: THREE.Object3D[] = [];
-	constructor() {
-		super();
-	}
+	private readonly _raycaster = new THREE.Raycaster();
+	private readonly _objs: THREE.Object3D[] = [];
+	private _skipNextClick = false;
 
-	protected useCtx<TModules extends KVY.ModulesRecord>(
-		ctx: KVY.CoreContext<TModules>
-	): KVY.ReturnOfUseCtx {
-		const canvas = ctx.three.renderer.domElement;
+	onAwake() {
+		const canvas = this.ctx.renderer.domElement;
 
-		const onClick = (event: MouseEvent) => {
+		canvas.addEventListener("click", (event) => {
 			if (this._skipNextClick) {
 				this._skipNextClick = false;
 				return;
 			}
-			this.intersectionFromPointer(event, ctx, (x) => {
-				this.emit("click", x);
-			});
-		};
+			if (event.currentTarget !== event.target) return;
+			this.emit("click", this.intersectionFromPointer(event));
+		});
 
-		const onMouseMove = (event: MouseEvent) => {
-			this.intersectionFromPointer(event, ctx, (x) => {
-				x && this.emit("hover", x);
-			});
-		};
+		canvas.addEventListener("mousemove", (event) => {
+			if (event.currentTarget !== event.target) return;
+			const intersection = this.intersectionFromPointer(event);
+			intersection && this.emit("hover", intersection);
+		});
+	}
 
-		canvas.addEventListener("click", onClick);
-		canvas.addEventListener("mousemove", onMouseMove);
-
-		return () => {
-			canvas.removeEventListener("click", onClick);
-			canvas.removeEventListener("mousemove", onMouseMove);
-		};
+	onStart() {
+		// orbiting the globe must not end up as a click on it
+		this.modules.cameraController.orbitControls.addEventListener("change", () => {
+			this.skipNextClick();
+		});
 	}
 
 	registerObj(obj: THREE.Object3D) {
@@ -51,30 +46,19 @@ export class PointerRaycasting extends KVY.CoreContextModule<{
 		objs.splice(index, 1);
 	}
 
-	private _skipNextClick = false;
-
 	skipNextClick() {
 		this._skipNextClick = true;
 	}
 
-	private intersectionFromPointer(
-		event: MouseEvent,
-		ctx: KVY.CoreContext,
-		callback?: (intersection?: THREE.Intersection) => void
-	) {
-		if (event.currentTarget !== event.target) return;
-		const canvas = event.target as HTMLCanvasElement;
-		const rect = canvas.getBoundingClientRect();
+	private intersectionFromPointer(event: MouseEvent): THREE.Intersection | undefined {
+		const rect = this.ctx.renderer.domElement.getBoundingClientRect();
 
 		mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
 		mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-		const raycaster = ctx.three.raycaster;
-		const camera = ctx.three.camera;
-		raycaster.setFromCamera(mouse, camera);
-		const intersection = raycaster.intersectObjects(this._objs, false)[0];
-		callback && callback(intersection);
-		return intersection;
+		const raycaster = this._raycaster;
+		raycaster.setFromCamera(mouse, this.ctx.camera);
+		return raycaster.intersectObjects(this._objs, false)[0];
 	}
 }
 

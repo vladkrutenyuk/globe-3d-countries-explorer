@@ -1,11 +1,11 @@
-import * as KVY from "@vladkrutenyuk/three-kvy-core";
+import { ContextModule } from "three-start";
 
 /**
  *  Country alpha-code (ISO 3166-1 alpha-3)
  */
 export type Country = string;
 
-export class GeoJsonManager extends KVY.CoreContextModule {
+export class GeoJsonManager extends ContextModule {
 	readonly data: GeoJsonFeatureCollection;
 	readonly countryIdPropKey: string;
 	private readonly _featuresById: Partial<Record<string, GeoJsonFeature>> = {};
@@ -20,13 +20,6 @@ export class GeoJsonManager extends KVY.CoreContextModule {
 			if (!id) continue;
 			this._featuresById[id] = feature;
 		}
-	}
-
-	protected useCtx<TModules extends KVY.ModulesRecord>(
-		ctx: KVY.CoreContext<TModules>
-	): KVY.ReturnOfUseCtx {
-		ctx;
-		return;
 	}
 
 	getFeatureById(id: string) {

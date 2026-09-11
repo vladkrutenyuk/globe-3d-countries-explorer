@@ -1,44 +1,29 @@
-import * as THREE from "three";
-import { glsl } from "./_glsl";
+import * as THREE from "three/webgpu";
+import { dot, float, mix, normalView, output, positionViewDirection, uniform, vec4 } from "three/tsl";
 
-export type FresnelUniforms = {
-	fresnelPower: THREE.Uniform<number>;
-	fresnelIntensity: THREE.Uniform<number>;
-	fresnelColor: THREE.Uniform<THREE.Color>;
-}
-
-export function fresnel<T extends THREE.Material>(
-	material: T,
-	uniforms: FresnelUniforms
-): T {
-	material.onBeforeCompile = (program) => {
-		Object.assign(program.uniforms, uniforms);
-
-		program.fragmentShader = program.fragmentShader.replace(
-			glsl`#include <common>`,
-			glsl`
-            #include <common>
-			uniform float fresnelPower;
-			uniform float fresnelIntensity;
-			uniform vec3 fresnelColor;
-          `
-		);
-
-		program.fragmentShader = program.fragmentShader.replace(
-			glsl`#include <opaque_fragment>`,
-			glsl`        
-            #include <opaque_fragment>
-    
-            vec3 viewDir = normalize(vViewPosition);
-            float fresnel = pow(1.0 - abs(dot(viewDir, normal)), fresnelPower);
-            fresnel = clamp(fresnel * fresnelIntensity, 0.0, 1.0);
-            
-            vec4 curCol = gl_FragColor;
-            gl_FragColor = mix(curCol, vec4(fresnelColor,1.0), fresnel);
-          `
-		);
-
-		material.userData.shader = program;
+/**
+ * Blends the lit output towards `color` at grazing view angles.
+ * Returns uniforms to tweak the effect at runtime.
+ */
+export function fresnel(
+	material: THREE.NodeMaterial,
+	params: { power: number; intensity: number; color: THREE.ColorRepresentation }
+) {
+	const uniforms = {
+		power: uniform(params.power),
+		intensity: uniform(params.intensity),
+		color: uniform(new THREE.Color(params.color)),
 	};
-	return material;
+
+	const factor = float(1)
+		.sub(dot(positionViewDirection, normalView).abs())
+		.pow(uniforms.power)
+		.mul(uniforms.intensity)
+		.saturate();
+
+	material.outputNode = mix(output, vec4(uniforms.color, 1), factor);
+
+	return uniforms;
 }
+
+export type FresnelUniforms = ReturnType<typeof fresnel>;

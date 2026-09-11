@@ -1,11 +1,10 @@
-import { CoreContext, IFeaturable, Object3DFeature } from "@vladkrutenyuk/three-kvy-core";
-import * as THREE from "three";
-import { AppCoreCtxModule } from "../AppCore";
+import * as THREE from "three/webgpu";
+import { Object3DBehaviour } from "three-start";
 import { SCENE_COLORS } from "../config";
 
 type ColorRgbExpression = `rgb(${number},${number},${number})`;
 
-export class GlobeMap extends Object3DFeature<AppCoreCtxModule> {
+export class GlobeMap extends Object3DBehaviour {
 	canvas: HTMLCanvasElement;
 	canvasCtx: CanvasRenderingContext2D;
 	texture: THREE.CanvasTexture;
@@ -21,9 +20,10 @@ export class GlobeMap extends Object3DFeature<AppCoreCtxModule> {
 	height = 4096;
 
 	private readonly _countryByIdColors: Partial<Record<ColorRgbExpression, string>> = {};
+	private _unwatchTheme?: () => void;
 
-	constructor(object: IFeaturable) {
-		super(object);
+	constructor() {
+		super();
 		const canvas = document.createElement("canvas");
 		canvas.width = this.width;
 		canvas.height = this.height;
@@ -48,21 +48,22 @@ export class GlobeMap extends Object3DFeature<AppCoreCtxModule> {
 		this.highlightTexture = new THREE.CanvasTexture(highlightCanvas);
 	}
 
-	protected useCtx(
-		ctx: CoreContext<AppCoreCtxModule>
-	): undefined | (() => void) | void {
-		const { geoJson, themeMode } = ctx.modules;
-
+	onAwake() {
+		const { geoJson } = this.modules;
 		this.drawMapId(geoJson.data, geoJson.countryIdPropKey);
-		const unwatch = themeMode.watch((isDark) => {
-			const land = isDark ? SCENE_COLORS.dark.map.land : SCENE_COLORS.light.map.land;
-			const water = isDark ? SCENE_COLORS.dark.map.water : SCENE_COLORS.light.map.water;
-			this.drawMap(geoJson.data, land, water);
-		})
-		return () => {
-			unwatch();
-			this.dispose();
-		};
+	}
+
+	onEnable() {
+		this._unwatchTheme = this.modules.themeMode.watch(this.onThemeChange);
+	}
+
+	onDisable() {
+		this._unwatchTheme?.();
+		this._unwatchTheme = undefined;
+	}
+
+	onDestroy() {
+		this.dispose();
 	}
 
 	dispose() {
@@ -100,6 +101,11 @@ export class GlobeMap extends Object3DFeature<AppCoreCtxModule> {
 		this.highlightTexture.needsUpdate = true;
 	}
 
+	private readonly onThemeChange = (isDark: boolean) => {
+		const colors = isDark ? SCENE_COLORS.dark.map : SCENE_COLORS.light.map;
+		this.drawMap(this.modules.geoJson.data, colors.land, colors.water);
+	};
+
 	private drawMap(geojson: GeoJsonFeatureCollection, landCol: string, waterCol: string) {
 		const ctx = this.canvasCtx;
 		ctx.clearRect(0, 0, this.width, this.height);
@@ -127,7 +133,7 @@ export class GlobeMap extends Object3DFeature<AppCoreCtxModule> {
 			const color = this.getIdColorByIndex(i);
 			const name = feature.properties[countryIdPropKey];
 
-			if (!name) return;
+			if (!name) continue;
 
 			this._countryByIdColors[color] = name.toString();
 

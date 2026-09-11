@@ -1,8 +1,8 @@
-import * as KVY from "@vladkrutenyuk/three-kvy-core";
-import EventEmitter from "eventemitter3";
-import * as THREE from "three";
-import { Globe } from "./features/Globe";
-import { SCENE_COLORS, WORLD_GEOJSON_URL } from "./config";
+import * as THREE from "three/webgpu";
+import { addComponent, ThreeStart, type ThreeContext } from "three-start";
+import { Globe } from "./components/Globe";
+import { SceneEnvironment } from "./components/SceneEnvironment";
+import { WORLD_GEOJSON_URL } from "./config";
 import { CameraController } from "./modules/CameraController";
 import { GeoJsonManager } from "./modules/GeoJsonManager";
 import { PointerRaycasting } from "./modules/PointerRaycasting";
@@ -12,79 +12,62 @@ type AppAssets = {
 	geoJson: GeoJsonFeatureCollection;
 };
 
-export type AppCoreCtxModule = {
+export type AppModules = {
 	pointer: PointerRaycasting;
 	geoJson: GeoJsonManager;
 	cameraController: CameraController;
 	themeMode: ThemeModeManager;
 };
 
-export class AppCore extends EventEmitter {
-	static async loadAsync(): Promise<AppCore> {
-		const geoJson = (await (
-			await fetch(WORLD_GEOJSON_URL)
-		).json()) as GeoJsonFeatureCollection;
+declare module "three-start" {
+	interface ThreeStartRegister {
+		modules: AppModules;
+	}
+}
 
-		const assets: AppAssets = {
-			geoJson,
-		};
-		return new AppCore(assets);
+export class AppCore {
+	static async loadAsync(): Promise<AppCore> {
+		const renderer = new THREE.WebGPURenderer({ antialias: true });
+
+		// init renderer here instead of ThreeStart's fire-and-forget init:
+		// failure lands in the error fallback, and the first frame after mount is drawn
+		const [geoJson] = await Promise.all([
+			fetch(WORLD_GEOJSON_URL).then(
+				(res) => res.json() as Promise<GeoJsonFeatureCollection>
+			),
+			renderer.init(),
+		]);
+
+		return new AppCore(renderer, { geoJson });
 	}
 
-	readonly ctx: KVY.CoreContext<AppCoreCtxModule>;
+	readonly starter: ThreeStart;
 	readonly assets: AppAssets;
 	readonly globe: Globe;
 
-	private constructor(assets: AppAssets) {
-		super();
+	get ctx(): ThreeContext {
+		return this.starter.ctx;
+	}
+
+	private constructor(renderer: THREE.WebGPURenderer, assets: AppAssets) {
 		this.assets = assets;
-		const ctx = KVY.CoreContext.create(
-			THREE,
-			{
-				pointer: new PointerRaycasting(),
-				geoJson: new GeoJsonManager(assets.geoJson, "adm0_a3"),
-				cameraController: new CameraController(),
-				themeMode: new ThemeModeManager(true),
-			},
-			{ antialias: true }
-		);
-		ctx.modules.cameraController.orbitControls.addEventListener("change", () => {
-			this.ctx.modules.pointer.skipNextClick();
+		renderer.setPixelRatio(window.devicePixelRatio);
+
+		const starter = new ThreeStart({ renderer, autoInitRenderer: false }).addModules({
+			pointer: new PointerRaycasting(),
+			geoJson: new GeoJsonManager(assets.geoJson, "adm0_a3"),
+			cameraController: new CameraController(),
+			themeMode: new ThemeModeManager(true),
 		});
-		this.ctx = ctx;
+		this.starter = starter;
 
-		ctx.three.renderer.setPixelRatio(window.devicePixelRatio);
+		const scene = starter.ctx.scene;
+		addComponent(scene, SceneEnvironment);
 
-		const scene = ctx.three.scene;
-		const bgColor = new THREE.Color();
-		scene.background = bgColor;
-		ctx.modules.themeMode.watch((isDark) => {
-			bgColor.set(
-				isDark ? SCENE_COLORS.dark.background : SCENE_COLORS.light.background
-			);
-		});
+		const globeObject = new THREE.Group();
+		this.globe = addComponent(globeObject, Globe);
+		scene.add(globeObject);
 
-		// globe
-		const globe = KVY.addFeature(new THREE.Group(), Globe);
-		ctx.root.add(globe.object);
-		this.globe = globe;
-
-		const camera = ctx.three.camera;
-
-		// light
-		const dirLight = new THREE.DirectionalLight();
-		scene.add(camera);
-		camera.add(dirLight);
-		dirLight.position.y = 3;
-		dirLight.position.x = -1;
-        const ambLight = new THREE.AmbientLight();
-
-        ctx.modules.themeMode.watch(isDark => {
-            if (isDark) {
-                ambLight.removeFromParent();
-            } else {
-                scene.add(ambLight);
-            }
-        })
+		starter.start();
 	}
 }

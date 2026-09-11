@@ -1,48 +1,20 @@
-import * as THREE from "three";
-import { enableUv } from "./uv";
-import { glsl } from "./_glsl";
+import * as THREE from "three/webgpu";
+import { distance, float, materialOpacity, smoothstep, uv, vec2 } from "three/tsl";
 
-export function ring<TMat extends THREE.Material>(
-	mat: TMat,
-	uniforms: {
-		radius: THREE.Uniform<number>;
-		thickness: THREE.Uniform<number>;
-	}
-) {
-	mat.onBeforeCompile = (program) => {
-		Object.assign(program.uniforms, uniforms);
+/** Masks opacity to a ring centered in uv space. Sizes are in uv units. */
+export function ring<T extends THREE.NodeMaterial>(
+	material: T,
+	params: { radius: number; thickness: number }
+): T {
+	const dist = distance(uv(), vec2(0.5));
+	const r = float(params.radius / 2);
+	const th = float(params.thickness / 2);
 
-		enableUv(program);
+	const circle = smoothstep(r, r.add(0.01), dist).oneMinus();
+	const inner = smoothstep(r.sub(th), r.sub(th).add(0.01), dist);
 
-		program.fragmentShader = program.fragmentShader.replace(
-			glsl`#include <common>`,
-			glsl`
-            #include <common>
-			uniform float radius;
-			uniform float thickness;
-          `
-		);
-
-		program.fragmentShader = program.fragmentShader.replace(
-			glsl`#include <opaque_fragment>`,
-			glsl`        
-            #include <opaque_fragment>
-
-            vec2 center = vec2(0.5, 0.5);
-            float dist = distance(vUv, center);
-
-            float r = radius / 2.0;
-            float th = thickness / 2.0;
-
-            float circle = 1.0 - smoothstep(r, r + 0.01, dist);
-
-            float inner = smoothstep(r - th, r - th + 0.01, dist);
-            float ringMask = circle * inner;
-    
-            gl_FragColor.a *= ringMask;
-          `
-		);
-	};
-
-	return mat;
+	// opacity is tweened from above 1 – saturate, since scenePass renders into
+	// a float target where alpha is not clamped to [0, 1] before blending
+	material.opacityNode = materialOpacity.mul(circle.mul(inner)).saturate();
+	return material;
 }

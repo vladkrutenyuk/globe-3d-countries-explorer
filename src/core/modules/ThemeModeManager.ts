@@ -1,6 +1,6 @@
-import { CoreContextModule } from "@vladkrutenyuk/three-kvy-core";
+import { ContextModule } from "three-start";
 
-export class ThemeModeManager extends CoreContextModule<{ change: [isDark: boolean] }> {
+export class ThemeModeManager extends ContextModule<{ change: [isDark: boolean] }> {
 	private _isDark: boolean;
 
 	public get isDark() {
