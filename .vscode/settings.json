@@ -1,0 +1,9 @@
+{
+	// TypeScript 7 (native) via "TypeScript (Native Preview)" extension
+	"js/ts.experimental.useTsgo": true,
+
+	// oxlint + oxfmt via "Oxc" extension
+	"oxc.typeAware": true,
+	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"editor.formatOnSave": true
+}
