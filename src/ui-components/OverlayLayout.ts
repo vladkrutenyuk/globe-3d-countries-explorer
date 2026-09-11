@@ -10,5 +10,9 @@ export const OverlayLayout = () => {
 		infoOpen.val = true;
 	};
 
-	return [TopBar(CountryContextBar(openInfo)), ThemeSwitchButton(), CountryInfoPanel(infoOpen)];
+	return [
+		TopBar(CountryContextBar(openInfo)),
+		ThemeSwitchButton(),
+		CountryInfoPanel(infoOpen),
+	];
 };

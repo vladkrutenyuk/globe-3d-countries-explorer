@@ -1,11 +1,11 @@
 {
-  "version": "0.0.1",
-  "configurations": [
-    {
-      "name": "vite-dev",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev", "--port", "5173", "--strictPort"],
-      "port": 5173
-    }
-  ]
+	"version": "0.0.1",
+	"configurations": [
+		{
+			"name": "vite-dev",
+			"runtimeExecutable": "pnpm",
+			"runtimeArgs": ["dev", "--port", "5173", "--strictPort"],
+			"port": 5173
+		}
+	]
 }

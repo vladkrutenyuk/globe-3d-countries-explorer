@@ -13,7 +13,8 @@ html {
 	line-height: 1.5;
 	-webkit-text-size-adjust: 100%;
 	tab-size: 4;
-	font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+	font-family:
+		ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
 		"Segoe UI Symbol", "Noto Color Emoji";
 	-webkit-tap-highlight-color: transparent;
 }
@@ -52,7 +53,8 @@ code,
 kbd,
 samp,
 pre {
-	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+	font-family:
+		ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
 		"Courier New", monospace;
 	font-size: 1em;
 }

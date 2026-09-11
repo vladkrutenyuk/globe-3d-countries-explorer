@@ -15,7 +15,9 @@ export const CountryInfo = () => {
 
 		return div(
 			h2({ class: "info-title" }, name.common),
-			name.official !== name.common ? p({ class: "info-subtitle" }, name.official) : "",
+			name.official !== name.common
+				? p({ class: "info-subtitle" }, name.official)
+				: "",
 			hr({ class: "info-divider" }),
 
 			Field("Flag", img({ width: 100, src: data.flags.png, alt: data.flags.alt })),
@@ -39,8 +41,18 @@ export const CountryInfo = () => {
 
 			div(
 				{ class: "info-links" },
-				a({ class: "btn btn-outline", href: maps.googleMaps, target: "_blank" }, "Google Maps"),
-				a({ class: "btn btn-outline", href: maps.openStreetMaps, target: "_blank" }, "OpenStreetMap")
+				a(
+					{ class: "btn btn-outline", href: maps.googleMaps, target: "_blank" },
+					"Google Maps"
+				),
+				a(
+					{
+						class: "btn btn-outline",
+						href: maps.openStreetMaps,
+						target: "_blank",
+					},
+					"OpenStreetMap"
+				)
 			)
 		);
 	});

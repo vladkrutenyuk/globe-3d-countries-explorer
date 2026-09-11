@@ -62,7 +62,7 @@ export class GlobeMap extends Object3DBehaviour {
 		const y = Math.floor((1 - uv.y) * idCanvas.height);
 
 		const pixel = this.idCanvasCtx.getImageData(x, y, 2, 2).data;
-		const [r, g, b] = pixel;
+		const [r = 0, g = 0, b = 0] = pixel;
 		const key = `rgb(${r},${g},${b})` as const;
 
 		return this._countryByIdColors[key];
@@ -81,7 +81,11 @@ export class GlobeMap extends Object3DBehaviour {
 		this.drawMap(this.modules.geoJson.data, colors.land, colors.water);
 	};
 
-	private drawMap(geojson: GeoJsonFeatureCollection, landCol: string, waterCol: string) {
+	private drawMap(
+		geojson: GeoJsonFeatureCollection,
+		landCol: string,
+		waterCol: string
+	) {
 		const ctx = this.canvasCtx;
 		ctx.clearRect(0, 0, this.width, this.height);
 
@@ -102,9 +106,7 @@ export class GlobeMap extends Object3DBehaviour {
 
 		idCtx.clearRect(0, 0, idCanvas.width, idCanvas.height);
 
-		for (let i = 0; i < geojson.features.length; i++) {
-			const feature = geojson.features[i];
-
+		for (const [i, feature] of geojson.features.entries()) {
 			const color = this.getIdColorByIndex(i);
 			const name = feature.properties[countryIdPropKey];
 
@@ -133,7 +135,7 @@ export class GlobeMap extends Object3DBehaviour {
 		if (geometry.type === "Polygon") {
 			ctx.beginPath();
 
-			geometry.coordinates[0].forEach(([lon, lat], index) => {
+			geometry.coordinates[0]?.forEach(([lon, lat], index) => {
 				const x = ((lon + 180) / 360) * this.width;
 				const y = ((-lat + 90) / 180) * this.height;
 				if (index === 0) ctx.moveTo(x, y);
@@ -147,7 +149,7 @@ export class GlobeMap extends Object3DBehaviour {
 			geometry.coordinates.forEach((polygon) => {
 				ctx.beginPath();
 
-				polygon[0].forEach(([lon, lat], index) => {
+				polygon[0]?.forEach(([lon, lat], index) => {
 					const x = ((lon + 180) / 360) * this.width;
 					const y = ((-lat + 90) / 180) * this.height;
 					if (index === 0) ctx.moveTo(x, y);

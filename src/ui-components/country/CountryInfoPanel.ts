@@ -20,7 +20,11 @@ export const CountryInfoPanel = (open: State<boolean>) => {
 		div(
 			{ class: "info-panel", role: "dialog", "aria-modal": "true" },
 			button(
-				{ class: "btn btn-ghost btn-icon info-close", "aria-label": "Close", onclick: close },
+				{
+					class: "btn btn-ghost btn-icon info-close",
+					"aria-label": "Close",
+					onclick: close,
+				},
 				createElement(X)
 			),
 			CountryInfo()

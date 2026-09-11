@@ -31,7 +31,10 @@ export class GlobeClickEffect extends Object3DBehaviour {
 		root.add(ringPlane);
 		this._ringPlane = ringPlane;
 
-		this.modules.cameraController.orbitControls.addEventListener("change", this.onCameraChange);
+		this.modules.cameraController.orbitControls.addEventListener(
+			"change",
+			this.onCameraChange
+		);
 		this.onCameraChange();
 		$isDark.subscribe(this.onThemeChange);
 	}

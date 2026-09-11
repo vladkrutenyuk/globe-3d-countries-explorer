@@ -41,7 +41,11 @@ export class Globe extends Object3DBehaviour {
 			emissive: new THREE.Color(0xffffff),
 			emissiveMap: map.highlightTexture,
 		});
-		this._fresnel = fresnel(globeMaterial, { power: 8, intensity: 0.2, color: 0x000000 });
+		this._fresnel = fresnel(globeMaterial, {
+			power: 8,
+			intensity: 0.2,
+			color: 0x000000,
+		});
 
 		const sphere = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 32), globeMaterial);
 		this.object.add(sphere);
